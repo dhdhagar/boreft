@@ -1,0 +1,69 @@
+{
+  "catalog": "molopt_p90_3072",
+  "source": "checkpoint_recon",
+  "reft_output_dir": "outputs/1789933841",
+  "warmstart_count": 10,
+  "seeds": {
+    "1": [
+      "CS(=O)(=O)c1ccc([C@@H](O)[C@@H](CO)NC(=O)C(Cl)Cl)cc1",
+      "CCCCC/C=C\\C/C=C\\C/C=C\\C/C=C\\C/C=C\\CCC(=O)OCC",
+      "CCCCCC[C@H](C)[C@@H](O)CC(=O)O",
+      "CC(C)(C)C(O)/C(=C\\c1ccc(Cl)cc1Cl)n1cncn1",
+      "C[C@H](N)C(=O)O",
+      "[NH3+]CC(O)P(=O)([O-])O",
+      "CN(C)C(=O)Nc1ccc(Cl)cc1",
+      "O=C1OC(c2ccc(O)cc2)Cc2cccc(O)c21",
+      "CCCCOc1cc(C(=O)NCCN(CC)CC)c2ccccc2n1",
+      "C[C@H]1/C(=C/C(=O)OCCN(C)C)CC[C@H]2[C@H]1[C@@H](O)C[C@H]1C(C)(C)[C@@H](O)CC[C@]21C"
+    ],
+    "2": [
+      "O=C(O)[C@H]1O[C@H](O[C@@H]2[C@H](O)[C@@H](O)[C@@H](O)O[C@@H]2C(=O)O)[C@H](O)[C@@H](O)[C@H]1O",
+      "CC(O)C1=Nc2c(nc(N)[nH]c2=O)NC1C",
+      "Cc1ccccc1N1C(=O)c2cc(S(N)(=O)=O)c(Cl)cc2NC1C",
+      "C=C(Cc1ccc2c(c1)OCO2)C(=C)Cc1ccc(O)cc1O",
+      "O=P(O)(O)C(O)(Cn1ccnc1)P(=O)(O)O",
+      "CCCCCOC[C@@H](O)CO[C@@H]1O[C@H](CO)[C@H](O)[C@H](OS(=O)(=O)O)[C@H]1O",
+      "NC(N)=[NH+]CC1COC2(CCCCC2)O1",
+      "Cc1nnc(-c2ccccc2)c(=O)[nH]1",
+      "CCC(CC)[C@H](NC(C)=O)[C@@H]1[C@H](O)[C@@H](C(=O)O)C[C@H]1N=C(N)N",
+      "C[C@H](N)C(=O)c1ccccc1"
+    ],
+    "3": [
+      "O[C@@H]1[C@@H](O)[C@H](O)O[C@H](CS)[C@@H]1O",
+      "CCCCCCC(=O)[O-]",
+      "CCCCC/C=C\\C/C=C\\C(/C=C\\CCCCCCC(=O)O)OO",
+      "O=C(O)CCCC(O)/C=C/C=C\\C/C=C\\C/C=C\\CCCCCO",
+      "C=C(C)[C@@H]1CC[C@@H](C)C(=C)C1",
+      "Cc1cccn2c(=O)c(-c3cc(Cl)cc(Cl)c3)c([O-])[n+](Cc3cnc(Cl)s3)c12",
+      "CSCCC/C=[N+](/[O-])O",
+      "CCn1ncc(C(=O)c2ccc(S(C)(=O)=O)c(OCCOC)c2C)c1O[C@@H](C)OC(=O)OC",
+      "C=C1c2oc(/C=C/C=C/CCCCC)c(O)c(=O)c2C(=O)N1C",
+      "CC(O)C1=Nc2c(nc(N)[nH]c2=O)NC1C"
+    ],
+    "4": [
+      "CCCCCCC/C=C/C(=O)OCC",
+      "CCCCC/C=C\\C[C@@H](O)[C@H](O)C/C=C\\C/C=C\\CCCC(=O)O",
+      "C/C=C(\\C)C(=O)OC[C@@]1(O)CCC[C@@H]2[C@@](C)(CCC3=CC(=O)OC3)[C@H](C)C[C@H](O)[C@]21CO",
+      "O=C(O)c1cc(O[C@@H]2O[C@H](CO)[C@@H](O)[C@H](O)[C@H]2O)ccc1O",
+      "C[C@@H](NC(=O)CC[C@H]([NH3+])C(=O)[O-])C(=O)[O-]",
+      "CN1C(=O)[C@H](O[C@@H]2O[C@H](C(=O)[O-])[C@@H](O)[C@H](O)[C@H]2O)C[C@H]1c1cccnc1",
+      "CSCCC[C@H](NO)C(=O)O",
+      "C=C1OC(C)=C(O)C1=O",
+      "CC(C)(O)C[C@H](N)C(=O)O",
+      "CC(O)/C=C\\C/C=C\\C/C=C\\C/C=C\\C/C=C\\CCCC(=O)O"
+    ],
+    "5": [
+      "CCNc1nc(Cl)nc(NC(C)(C)C#N)n1",
+      "CN(C)c1ccc(C(=C2C=CC(=[N+](C)C)C=C2)c2ccc(OCCCC(=O)NCCNC(=O)CCC(=O)NCCOCCOCCN)cc2)cc1",
+      "NC(N)=[NH+]CCCC[NH3+]",
+      "CCCCN(CCCC)C(=S)S",
+      "CCCCCCCCCCCCCCOc1ccc(C(=O)O)o1",
+      "C=C[C@@]1(C)CC[C@H]2C(=CC[C@@H]3[C@]2(C)CCC[C@@]3(C)C(=O)O)C1",
+      "c1ccc2c(c1)ccc1ccc3ccccc3c12",
+      "CC1=NC[C@H](O)[C@@H](C(=O)O)N1",
+      "CC1(C)CC[C@]2(C)CC[C@]3(C)C(=CC(=O)[C@@H]4[C@@]5(C)CC[C@H](O)C(C)(C)[C@@H]5CC[C@]43C)[C@@H]2C1",
+      "CS(=O)c1cc(O)cc(CO)c1O"
+    ]
+  },
+  "note": "Shared labeled warmstarts for molopt 3072-p90 catalogs. Search looks up each SMILES in the checkpoint train table and uses that run's \u03bc. Every method and oracle uses this set."
+}

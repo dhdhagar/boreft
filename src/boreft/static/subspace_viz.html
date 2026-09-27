@@ -1,0 +1,3053 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>BOReFT Subspace Explorer</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #090b10;
+      --panel: #11151d;
+      --panel-2: #171c26;
+      --line: #2a3342;
+      --muted: #8f9bad;
+      --text: #edf2f7;
+      --accent: #77a7ff;
+      --learned: #ffb454;
+      --danger: #ff6b7a;
+    }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; overflow: hidden; }
+    body {
+      margin: 0;
+      background: radial-gradient(circle at 20% 0%, #172036 0, transparent 36%), var(--bg);
+      color: var(--text);
+      font: 14px/1.45 Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    button, input, textarea, select { font: inherit; }
+    button {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel-2);
+      color: var(--text);
+      padding: 7px 11px;
+      cursor: pointer;
+    }
+    button:hover { border-color: var(--accent); }
+    button:disabled { opacity: .45; cursor: wait; }
+    input, textarea, select {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #0c1017;
+      color: var(--text);
+      padding: 8px 10px;
+      outline: none;
+    }
+    input:focus, textarea:focus, select:focus { border-color: var(--accent); }
+    .shell {
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr);
+      height: 100dvh;
+      min-height: 0;
+      overflow: hidden;
+    }
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(9, 11, 16, .76);
+      backdrop-filter: blur(16px);
+    }
+    h1 { margin: 0; font-size: 16px; letter-spacing: .02em; }
+    .subtitle { color: var(--muted); font-size: 12px; margin-top: 2px; }
+    .active {
+      max-width: 45vw;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      padding: 6px 10px;
+      border: 1px solid #36507b;
+      border-radius: 999px;
+      color: #cfe0ff;
+      background: #14213a;
+    }
+    main {
+      display: grid;
+      grid-template-columns: minmax(480px, 1fr) minmax(320px, 430px);
+      gap: 12px;
+      padding: 12px;
+      min-height: 0;
+      overflow: hidden;
+    }
+    .panel {
+      min-height: 0;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: rgba(17, 21, 29, .92);
+      box-shadow: 0 14px 45px rgba(0, 0, 0, .24);
+    }
+    .map-panel { display: grid; grid-template-rows: auto minmax(0, 1fr) auto; }
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      padding: 10px;
+      border-bottom: 1px solid var(--line);
+    }
+    .toolbar > input { min-width: 120px; flex: 1 1 180px; }
+    .toolbar label { display: flex; align-items: center; gap: 5px; color: var(--muted); }
+    .text-target { display: flex; flex: 2 1 320px; gap: 6px; }
+    .text-target input { min-width: 120px; flex: 1; }
+    .recovery-controls {
+      display: flex;
+      flex: 1 0 100%;
+      align-items: center;
+      gap: 8px;
+      padding-top: 2px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .recovery-controls select,
+    .recovery-controls input[type="number"] { padding: 5px 7px; }
+    .recovery-controls input[type="number"] { width: 58px; }
+    .new-target-controls input {
+      min-width: 130px;
+      flex: 1 1 180px;
+    }
+    .new-target-controls input:nth-of-type(2) { flex-grow: 2; }
+    .set-picker { position: relative; }
+    .set-picker > summary {
+      cursor: pointer;
+      list-style: none;
+      padding: 6px 10px;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      background: var(--panel-2);
+      color: var(--text);
+      white-space: nowrap;
+    }
+    .set-picker > summary::-webkit-details-marker { display: none; }
+    .set-picker-menu {
+      position: absolute;
+      top: calc(100% + 5px);
+      right: 0;
+      z-index: 8;
+      display: grid;
+      gap: 7px;
+      min-width: 230px;
+      padding: 10px;
+      border: 1px solid var(--line);
+      border-radius: 9px;
+      background: rgba(15, 20, 29, .98);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, .4);
+    }
+    .set-options {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(145px, 1fr));
+      gap: 6px 12px;
+    }
+    .set-options label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .set-count {
+      margin-left: auto;
+      color: #718096;
+      font-variant-numeric: tabular-nums;
+    }
+    .additional-targets {
+      width: 100%;
+      min-height: 72px;
+      font: 12px ui-monospace, SFMono-Regular, Menlo, monospace;
+    }
+    .job-status {
+      flex: 1 1 320px;
+      min-width: 240px;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      overflow: hidden;
+    }
+    .job-status .status-text {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      min-width: 0;
+    }
+    .status-spinner {
+      display: none;
+      flex: 0 0 auto;
+      width: 12px;
+      height: 12px;
+      border: 1.5px solid rgba(148, 163, 184, .25);
+      border-top-color: #7aa2ff;
+      border-radius: 50%;
+      animation: status-spin .7s linear infinite;
+    }
+    .job-status.is-pending .status-spinner,
+    .modal-status.is-pending .status-spinner {
+      display: inline-block;
+    }
+    @keyframes status-spin {
+      to { transform: rotate(360deg); }
+    }
+    .canvas-wrap { min-height: 0; position: relative; overflow: hidden; }
+    canvas { display: block; width: 100%; height: 100%; cursor: crosshair; }
+    .tooltip {
+      position: absolute;
+      display: none;
+      pointer-events: none;
+      max-width: 360px;
+      padding: 7px 9px;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      background: rgba(8, 11, 16, .96);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, .35);
+      font-size: 12px;
+      z-index: 3;
+    }
+    .map-footer {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      padding: 8px 11px;
+      color: var(--muted);
+      font-size: 12px;
+      border-top: 1px solid var(--line);
+    }
+    .map-footer-main {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+    }
+    .legend { display: flex; gap: 13px; flex-wrap: wrap; }
+    .category-legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px 11px;
+      max-height: 46px;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      padding-top: 2px;
+      border-top: 1px solid rgba(148, 163, 184, .18);
+    }
+    .category-legend[hidden] { display: none; }
+    .category-legend .category-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 0;
+      white-space: nowrap;
+      max-width: 160px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      cursor: pointer;
+      border: 1px solid transparent;
+      border-radius: 999px;
+      padding: 1px 7px 1px 5px;
+      margin: 0;
+      color: var(--muted);
+      background: transparent;
+      font: inherit;
+      font-size: 12px;
+      line-height: 1.3;
+      user-select: none;
+    }
+    .category-legend .category-label:hover {
+      color: var(--text);
+      border-color: rgba(148, 163, 184, .28);
+      background: rgba(148, 163, 184, .08);
+    }
+    .category-legend .category-label.is-active {
+      color: var(--text);
+      border-color: rgba(148, 163, 184, .45);
+      background: rgba(148, 163, 184, .16);
+    }
+    .category-legend.has-selection .category-label:not(.is-active) {
+      opacity: 0.45;
+    }
+    .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 5px; flex-shrink: 0; }
+    .diamond {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      margin: 0 6px 0 1px;
+      transform: rotate(45deg);
+      background: var(--learned);
+    }
+    .chat-panel {
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr) auto;
+      height: 100%;
+      min-height: 0;
+    }
+    .chat-controls {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+      padding: 10px;
+      border-bottom: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .chat-controls label { display: flex; align-items: center; gap: 5px; }
+    .chat-controls input[type="number"] { width: 66px; padding: 5px 7px; }
+    .messages { min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 14px; }
+    .empty {
+      height: 100%;
+      display: grid;
+      place-items: center;
+      text-align: center;
+      color: var(--muted);
+      padding: 30px;
+    }
+    .message { margin-bottom: 14px; }
+    .role { color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: .08em; margin-bottom: 4px; }
+    .bubble {
+      padding: 9px 11px;
+      border-radius: 9px;
+      background: var(--panel-2);
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+    }
+    .message.user .bubble { background: #14213a; border: 1px solid #263c62; }
+    .flags { margin-top: 5px; color: var(--muted); font: 11px ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .composer {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 8px;
+      padding: 10px;
+      border-top: 1px solid var(--line);
+    }
+    textarea { resize: none; min-height: 66px; max-height: 160px; }
+    .status-error { color: var(--danger); }
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 40;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 18px;
+      background: rgba(4, 7, 12, .62);
+      backdrop-filter: blur(8px);
+    }
+    .modal-backdrop.open { display: flex; }
+    .modal {
+      width: min(640px, 100%);
+      max-height: min(90dvh, 860px);
+      overflow: auto;
+      overscroll-behavior: contain;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: linear-gradient(180deg, #151b26 0%, var(--panel) 48%);
+      box-shadow: 0 24px 70px rgba(0, 0, 0, .45);
+      color: var(--text);
+    }
+    .modal-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 14px 16px 10px;
+      border-bottom: 1px solid var(--line);
+      position: sticky;
+      top: 0;
+      background: rgba(21, 27, 38, .96);
+      z-index: 1;
+    }
+    .modal-header h2 {
+      margin: 0;
+      font-size: 15px;
+      letter-spacing: .02em;
+    }
+    .modal-header p {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .modal-close {
+      flex: 0 0 auto;
+      min-width: 34px;
+      padding: 4px 9px;
+      line-height: 1.2;
+    }
+    .modal-body {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      padding: 14px 16px 18px;
+    }
+    .modal-section {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .modal-section h3 {
+      margin: 0;
+      font-size: 11px;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      font-weight: 600;
+    }
+    .modal-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px 12px;
+      align-items: center;
+    }
+    .modal-grid label { display: flex; align-items: center; gap: 5px; color: var(--muted); }
+    .modal-grid input[type="number"] { width: 72px; padding: 5px 7px; }
+    .modal-grid label.modal-grid-span {
+      flex: 1 1 100%;
+      min-width: 0;
+    }
+    .modal-grid input[type="text"] {
+      flex: 1 1 auto;
+      min-width: 140px;
+      width: min(420px, 100%);
+      padding: 5px 7px;
+    }
+    .loss-modules {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+      padding: 8px 10px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: rgba(10, 14, 22, .35);
+    }
+    .loss-module {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 6px 10px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .loss-module .module-name {
+      min-width: 88px;
+      color: var(--text);
+      font-weight: 500;
+    }
+    .loss-module input[type="number"] { width: 78px; padding: 5px 7px; }
+    .loss-module select { padding: 5px 7px; min-width: 110px; }
+    .loss-module[hidden] { display: none; }
+    .loss-module .wd-coeffs {
+      display: inline-flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 6px 8px;
+    }
+    .effective-config {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+      padding: 7px 9px;
+      border: 1px dashed rgba(148, 163, 184, .28);
+      border-radius: 8px;
+      background: rgba(10, 14, 22, .25);
+      word-break: break-word;
+    }
+    .modal-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+    .modal-status {
+      display: flex;
+      align-items: flex-start;
+      gap: 7px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.4;
+      word-break: break-word;
+    }
+    .modal-status .status-text { min-width: 0; flex: 1 1 auto; }
+    .modal-status .status-spinner { margin-top: 2px; }
+    .embed-sim-plot-wrap {
+      position: relative;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: #0d121a;
+      padding: 8px 8px 4px;
+    }
+    .embed-sim-plot-wrap canvas {
+      display: block;
+      width: 100%;
+      height: 160px;
+      cursor: crosshair;
+    }
+    .embed-sim-tooltip {
+      position: absolute;
+      display: none;
+      pointer-events: none;
+      z-index: 4;
+      max-width: 240px;
+      padding: 6px 8px;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      background: rgba(8, 11, 16, .96);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, .35);
+      color: var(--text);
+      font-size: 12px;
+      line-height: 1.35;
+      white-space: pre-wrap;
+    }
+    .embed-sim-legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px 14px;
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 11px;
+    }
+    .embed-sim-legend span {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .embed-sim-legend i {
+      display: inline-block;
+      width: 12px;
+      height: 2px;
+      border-radius: 1px;
+    }
+    .delta-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+    }
+    .delta-table th,
+    .delta-table td {
+      padding: 6px 8px;
+      border-bottom: 1px solid rgba(148, 163, 184, .14);
+      text-align: left;
+    }
+    .delta-table th {
+      color: var(--muted);
+      font-weight: 500;
+    }
+    .delta-table td.num {
+      font: 12px ui-monospace, SFMono-Regular, Menlo, monospace;
+      color: #d7e3f4;
+    }
+    .delta-table .na { color: var(--muted); }
+    .outcome-summary {
+      display: grid;
+      gap: 4px;
+      padding: 9px 11px;
+      border: 1px solid var(--line);
+      border-radius: 9px;
+      background: var(--panel-2);
+      font-size: 12px;
+      color: #c9d4e4;
+    }
+    .outcome-summary strong { color: var(--text); font-weight: 600; }
+    @media (max-width: 850px) {
+      main {
+        grid-template-columns: 1fr;
+        grid-template-rows: minmax(0, 56%) minmax(0, 44%);
+      }
+      .active { max-width: 50vw; }
+      .map-footer > span:last-child { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <header>
+      <div>
+        <h1>BOReFT Subspace Explorer</h1>
+        <div class="subtitle" id="metadata">Loading checkpoint…</div>
+      </div>
+      <div class="active" id="active">Base model</div>
+    </header>
+    <main>
+      <section class="panel map-panel">
+        <div class="toolbar">
+          <input id="search" type="search" placeholder="Find a point…">
+          <label><input id="show-test" type="checkbox"> original test</label>
+          <form class="text-target" id="text-target">
+            <input id="target-text" type="text" maxlength="4096" placeholder="Activate arbitrary text…">
+            <button id="activate-text" type="submit">Activate</button>
+          </form>
+          <button id="reset-view" type="button">Reset view</button>
+          <button id="base-mode" type="button">Base</button>
+          <button id="zero-mode" type="button">Zero bias</button>
+          <details class="set-picker" id="pca-set-picker">
+            <summary>PCA sets</summary>
+            <div class="set-picker-menu">
+              <div class="set-options" id="pca-set-options"></div>
+              <button id="apply-pca-sets" type="button">Apply PCA sets</button>
+            </div>
+          </details>
+          <div class="recovery-controls">
+            <select id="recovery-scope" title="Points to scan">
+              <option value="test">original test recovery</option>
+              <option value="train">original train recovery</option>
+              <option value="both">original train + test</option>
+            </select>
+            <label>samples <input id="recovery-samples" type="number" min="1" max="100" value="25"></label>
+            <button id="scan-recovery" type="button">Scan convergence</button>
+            <label><input id="misses-only" type="checkbox"> misses only</label>
+            <button id="open-recovery-panel" type="button">Recovery…</button>
+            <button id="pause-training" type="button" disabled>Pause</button>
+            <button id="stop-training" type="button" disabled>Stop</button>
+            <span class="job-status" id="recovery-status">
+              <span class="status-spinner" aria-hidden="true"></span>
+              <span class="status-text">Not scanned</span>
+            </span>
+          </div>
+        </div>
+        <div class="canvas-wrap" id="canvas-wrap">
+          <canvas id="plot"></canvas>
+          <div class="tooltip" id="tooltip"></div>
+        </div>
+        <div class="map-footer">
+          <div class="map-footer-main">
+            <span id="axes">PC1 · PC2</span>
+            <span class="legend">
+              <span><i class="dot" style="background:#77a7ff"></i>original train</span>
+              <span><i class="diamond"></i>additional</span>
+              <span><i class="dot" style="background:#72d6a5;border:1px dashed white"></i>original test</span>
+              <span><i class="dot" style="background:#0b0f16;border:1px solid #a0aec0"></i>unseen</span>
+            </span>
+            <span>click to activate · drag to pan · wheel to zoom</span>
+          </div>
+          <div class="category-legend" id="category-legend" hidden></div>
+        </div>
+      </section>
+      <section class="panel chat-panel">
+        <div class="chat-controls">
+          <label><input id="multi-turn" type="checkbox"> multi-turn</label>
+          <label><input id="enable-thinking" type="checkbox"> thinking</label>
+          <label><input id="sample" type="checkbox"> sample</label>
+          <label><input id="show-similarity" type="checkbox" disabled> similarity</label>
+          <label>temp <input id="temperature" type="number" min="0.05" max="10" step="0.05" value="1"></label>
+          <label>max tokens <input id="max-new-tokens" type="number" min="1" max="1024" step="1" value="64"></label>
+          <button id="clear-chat" type="button">Clear</button>
+        </div>
+        <div class="messages" id="messages">
+          <div class="empty" id="empty-chat">Select a point, then ask the model a question.<br>Clicking empty space activates its inverse-PCA bias.</div>
+        </div>
+        <form class="composer" id="composer">
+          <textarea id="prompt" placeholder="Message the model…" required></textarea>
+          <button id="send" type="submit">Send</button>
+        </form>
+      </section>
+    </main>
+  </div>
+  <div class="modal-backdrop" id="recovery-modal" role="dialog" aria-modal="true" aria-labelledby="recovery-modal-title" hidden>
+    <div class="modal" role="document">
+      <div class="modal-header">
+        <div>
+          <h2 id="recovery-modal-title">Recovery</h2>
+          <p>Learn shared components and inspect how much they moved.</p>
+        </div>
+        <button class="modal-close" id="close-recovery-panel" type="button" aria-label="Close recovery panel">×</button>
+      </div>
+      <div class="modal-body">
+        <section class="modal-section">
+          <h3>Training data</h3>
+          <div class="set-options" id="training-set-options"></div>
+          <textarea
+            class="additional-targets"
+            id="additional-learning-targets"
+            placeholder="Optional extra targets, one per line:&#10;target :: definition"
+          ></textarea>
+          <div class="modal-actions">
+            <button id="train-selected-sets" type="button">
+              Train selected sets + targets
+            </button>
+          </div>
+        </section>
+        <section class="modal-section">
+          <h3>Learning controls</h3>
+          <div class="modal-grid">
+            <label>epochs <input id="recovery-epochs" type="number" min="1" max="10000" placeholder="auto"></label>
+            <label>lr <input id="recovery-lr" type="number" min="0" step="any" placeholder="auto"></label>
+            <label title="LR schedule type. Auto inherits the checkpoint.">scheduler
+              <select id="recovery-scheduler">
+                <option value="auto">auto</option>
+                <option value="linear">linear</option>
+                <option value="cosine">cosine</option>
+                <option value="cosine_with_restarts">cosine restarts</option>
+                <option value="polynomial">polynomial</option>
+                <option value="constant">constant</option>
+                <option value="constant_with_warmup">constant+warmup</option>
+              </select>
+            </label>
+            <label title="Warmup as a fraction of total steps (0–1). Blank inherits the checkpoint.">warmup <input id="recovery-warmup" type="number" min="0" max="1" step="0.01" placeholder="auto"></label>
+            <label class="modal-grid-span" title="Linear loss-coefficient anneals. Blank inherits the checkpoint map; type none to disable. Format: KEY=START:END:EPOCHS or KEY=START:EPOCHS (keys: kl_beta, lambda_ce, lambda_sdpo).">annealing map
+              <input id="recovery-annealing-map" type="text" placeholder="auto" autocomplete="off" spellcheck="false">
+            </label>
+            <label title="Run during-training embed_sim eval every N epochs (inherits checkpoint when blank)">eval every N epochs <input id="recovery-eval-epochs" type="number" min="1" max="10000" placeholder="auto"></label>
+            <label title="Early-stop when mean embed_sim reaches this value (0–1). Requires eval every N epochs. Blank still stops at 1.0.">stop embed sim <input id="recovery-stop-threshold" type="number" min="0" max="1" step="0.01" placeholder="1 (auto)"></label>
+            <label title="Per-target embed_sim bar (tau). Combined with stop frac: stop when enough targets clear tau. Blank = off.">stop min embed sim <input id="recovery-stop-threshold-min" type="number" min="0" max="1" step="0.01" placeholder="off"></label>
+            <label title="Minimum fraction of eval targets with embed_sim ≥ stop min (tau). Blank = 1 (all targets). Requires stop min when &lt; 1. Must be in (0, 1].">stop frac <input id="recovery-stop-threshold-frac" type="number" min="0" max="1" step="any" placeholder="1"></label>
+            <label title="Update the shared source projection W"><input id="learn-w" type="checkbox"> learn W</label>
+            <label title="Update the shared orthogonal rotation R"><input id="learn-r" type="checkbox"> learn R</label>
+            <label title="Update the network that predicts target biases"><input id="learn-bias-network" type="checkbox"> learn bias network</label>
+            <label title="Legacy shortcut: rehearse every previously trained target in addition to the selected sets"><input id="include-previous" type="checkbox"> include all prior targets</label>
+          </div>
+          <div class="loss-modules" id="loss-modules">
+            <label class="loss-module" title="Primary LM objective (cross-entropy or margin). Uncheck to disable; blank weight inherits the checkpoint.">
+              <input id="recovery-ce" type="checkbox" checked>
+              <span class="module-name">CE</span>
+              <span>λ</span>
+              <input id="recovery-lambda-ce" type="number" min="0" step="any" placeholder="auto">
+            </label>
+            <label class="loss-module" id="recovery-vae-module" title="VAE KL term. Uncheck to disable; blank beta inherits the checkpoint. Hidden for linear (non-VAE) runs.">
+              <input id="recovery-vae" type="checkbox" checked>
+              <span class="module-name">VAE KL</span>
+              <span>β</span>
+              <input id="recovery-kl-beta" type="number" min="0" step="any" placeholder="auto">
+            </label>
+            <label class="loss-module" id="recovery-sdpo-module" title="SDPO self-distillation. Uncheck to disable; blank weight inherits the checkpoint. Only available for SDPO-capable tasks." hidden>
+              <input id="recovery-sdpo" type="checkbox">
+              <span class="module-name">SDPO</span>
+              <span>λ</span>
+              <input id="recovery-lambda-sdpo" type="number" min="0" step="any" placeholder="auto">
+            </label>
+            <label class="loss-module" title="AdamW weight decay on W and/or bias params. Uncheck forces none; auto inherits the checkpoint mode.">
+              <input id="recovery-wd" type="checkbox">
+              <span class="module-name">Weight decay</span>
+              <select id="recovery-wd-mode">
+                <option value="auto">auto</option>
+                <option value="none">none</option>
+                <option value="W_only">W only</option>
+                <option value="b_only">b only</option>
+                <option value="W_and_b">W and b</option>
+              </select>
+              <span class="wd-coeffs" id="recovery-wd-coeffs">
+                <span>wd_W</span>
+                <input id="recovery-wd-w" type="number" min="0" step="any" placeholder="auto">
+                <span>wd_b</span>
+                <input id="recovery-wd-b" type="number" min="0" step="any" placeholder="auto">
+              </span>
+            </label>
+          </div>
+          <div class="effective-config" id="effective-config" title="Resolved recovery settings that will be sent on the next train">
+            Effective: —
+          </div>
+          <div class="modal-actions">
+            <button id="recover-selected" type="button" disabled>Recover selected</button>
+            <button id="delete-learned" type="button" disabled title="Remove the selected learned target (or train/test learned overlay) from learned_biases.jsonl">Delete learned</button>
+            <button id="recover-train-misses" type="button" disabled>Recover train misses</button>
+            <button id="recover-test-misses" type="button" disabled>Recover test misses</button>
+          </div>
+          <form class="modal-actions" id="new-target-form">
+            <input id="new-target" type="text" maxlength="512" placeholder="New target…">
+            <input id="new-definition" type="text" maxlength="4096" placeholder="Definition…" style="flex:1 1 180px;min-width:140px">
+            <button id="train-new-target" type="submit">Train new target</button>
+          </form>
+        </section>
+        <section class="modal-section">
+          <h3>Job status</h3>
+          <div class="modal-status" id="recovery-modal-status">
+            <span class="status-spinner" aria-hidden="true"></span>
+            <span class="status-text">Not scanned</span>
+          </div>
+        </section>
+        <section class="modal-section">
+          <h3>Train loss</h3>
+          <div class="embed-sim-plot-wrap">
+            <canvas id="loss-plot" width="600" height="160" aria-label="Training loss over steps"></canvas>
+            <div class="embed-sim-tooltip" id="loss-tooltip"></div>
+            <div class="embed-sim-legend">
+              <span><i style="background:#f6ad55"></i>train loss</span>
+              <span><i style="background:#7aa2ff"></i>learning rate</span>
+            </div>
+          </div>
+        </section>
+        <section class="modal-section">
+          <h3>Embed sim progress</h3>
+          <div class="embed-sim-plot-wrap">
+            <canvas id="embed-sim-plot" width="600" height="160" aria-label="Embed similarity over training epochs"></canvas>
+            <div class="embed-sim-tooltip" id="embed-sim-tooltip"></div>
+            <div class="embed-sim-legend">
+              <span><i style="background:#68d391"></i>mean embed sim</span>
+              <span><i style="background:#7aa2ff"></i>min embed sim</span>
+              <span><i style="background:#ffb454;height:0;border-top:1.5px dashed #ffb454"></i>stop mean</span>
+              <span><i style="background:#f6ad55;height:0;border-top:1.5px dotted #f6ad55"></i>stop min</span>
+            </div>
+          </div>
+        </section>
+        <section class="modal-section">
+          <h3>Last train outcome</h3>
+          <div class="outcome-summary" id="recovery-outcome">No recovery train yet.</div>
+        </section>
+        <section class="modal-section">
+          <h3>Parameter change · vs previous run</h3>
+          <table class="delta-table" id="delta-previous">
+            <thead>
+              <tr><th>Component</th><th>Rel. L2</th><th>Abs. L2</th><th>Status</th></tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </section>
+        <section class="modal-section">
+          <h3>Parameter change · vs original checkpoint</h3>
+          <table class="delta-table" id="delta-original">
+            <thead>
+              <tr><th>Component</th><th>Rel. L2</th><th>Abs. L2</th><th>Status</th></tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </section>
+      </div>
+    </div>
+  </div>
+  <script>
+    (() => {
+      "use strict";
+      const $ = (selector) => document.querySelector(selector);
+      const canvas = $("#plot");
+      const ctx = canvas.getContext("2d");
+      const wrap = $("#canvas-wrap");
+      const tooltip = $("#tooltip");
+      const sessionId = sessionStorage.boreftVizSession ||
+        (sessionStorage.boreftVizSession = (crypto.randomUUID?.() || `${Date.now()}-${Math.random()}`));
+      const state = {
+        points: [],
+        bounds: null,
+        primaryBounds: null,
+        view: null,
+        hovered: null,
+        selected: null,
+        dragging: false,
+        moved: false,
+        dragStart: null,
+        search: "",
+        showTest: false,
+        missesOnly: false,
+        busy: false,
+        recoveryBusy: false,
+        activeRecoveryJobId: null,
+        activeRecoveryJob: null,
+        supportsText: true,
+        supportsRecovery: true,
+        isVae: false,
+        supportsSdpo: false,
+        hasTarget: false,
+        checkpointKlBeta: null,
+        checkpointLambdaCe: null,
+        checkpointLambdaSdpo: null,
+        checkpointWeightDecayMode: "none",
+        checkpointWdW: null,
+        checkpointWdB: null,
+        checkpointScheduler: "linear",
+        checkpointWarmup: 0,
+        checkpointAnnealingMapCli: "",
+        lossModulesInitialized: false,
+        lastRecoveryTrainResult: null,
+        embedSimPlotHits: [],
+        lossPlotHits: [],
+        setCounts: {},
+        projectionSets: [],
+        clusterSource: "none",
+        selectedCategories: new Set(),
+      };
+      const pointSetLabels = {
+        train_seen: "Original train · seen",
+        train_unseen: "Original train · unseen",
+        test_seen: "Original test · seen",
+        test_unseen: "Original test · unseen",
+        additional_seen: "Additional · seen",
+        additional_unseen: "Additional · unseen",
+      };
+      let operationQueue = Promise.resolve();
+      const promptHistory = [];
+      let promptHistoryIndex = 0;
+      let promptDraft = "";
+
+      async function api(path, options = {}) {
+        const response = await fetch(path, {
+          headers: { "Content-Type": "application/json", ...(options.headers || {}) },
+          ...options,
+        });
+        if (!response.ok) {
+          let message = `${response.status} ${response.statusText}`;
+          try { message = (await response.json()).detail || message; } catch (_) {}
+          throw new Error(message);
+        }
+        return response.json();
+      }
+
+      function enqueueOperation(operation) {
+        const next = operationQueue.then(operation, operation);
+        operationQueue = next.catch(() => {});
+        return next;
+      }
+
+      function colorFor(cluster) {
+        if (cluster === "learned") return "#ffb454";
+        if (cluster === "test-interp") return "#72d6a5";
+        if (cluster === "test-extrap") return "#ef8e8e";
+        let hash = 2166136261;
+        for (const char of cluster) hash = Math.imul(hash ^ char.charCodeAt(0), 16777619);
+        return `hsl(${Math.abs(hash) % 360} 68% 65%)`;
+      }
+
+      function renderSetOptions() {
+        for (const [containerId, inputClass] of [
+          ["pca-set-options", "pca-set"],
+          ["training-set-options", "training-set"],
+        ]) {
+          const container = $(`#${containerId}`);
+          if (!container) continue;
+          const previous = new Set(
+            [...container.querySelectorAll(`input.${inputClass}:checked`)]
+              .map((input) => input.value)
+          );
+          const fragment = document.createDocumentFragment();
+          for (const [key, label] of Object.entries(pointSetLabels)) {
+            const count = Number(state.setCounts[key] || 0);
+            const row = document.createElement("label");
+            const input = document.createElement("input");
+            input.type = "checkbox";
+            input.className = inputClass;
+            input.value = key;
+            input.disabled = count === 0 || state.recoveryBusy;
+            input.checked =
+              inputClass === "pca-set"
+                ? state.projectionSets.includes(key)
+                : previous.has(key) && count > 0;
+            input.addEventListener("change", () => {
+              updateTrainingSetButton();
+              updateEffectiveConfigSummary();
+            });
+            const countEl = document.createElement("span");
+            countEl.className = "set-count";
+            countEl.textContent = String(count);
+            row.append(
+              input,
+              document.createTextNode(label),
+              countEl
+            );
+            fragment.append(row);
+          }
+          container.replaceChildren(fragment);
+        }
+        updateTrainingSetButton();
+      }
+
+      function checkedSetValues(selector) {
+        return [...document.querySelectorAll(`${selector}:checked`)]
+          .map((input) => input.value);
+      }
+
+      function parseAdditionalLearningTargets() {
+        const text = $("#additional-learning-targets").value.trim();
+        if (!text) return [];
+        return text.split(/\r?\n/).filter((line) => line.trim()).map((line, index) => {
+          const separator = line.indexOf("::");
+          if (separator < 1) {
+            throw new Error(
+              `Additional target line ${index + 1} must be “target :: definition”`
+            );
+          }
+          const target = line.slice(0, separator).trim();
+          const definition = line.slice(separator + 2).trim();
+          if (!target || !definition) {
+            throw new Error(
+              `Additional target line ${index + 1} needs both target and definition`
+            );
+          }
+          return { target, definition };
+        });
+      }
+
+      function updateTrainingSetButton() {
+        const button = $("#train-selected-sets");
+        if (!button) return;
+        const hasSets = checkedSetValues("input.training-set").length > 0;
+        const hasText = Boolean($("#additional-learning-targets")?.value.trim());
+        button.disabled =
+          state.recoveryBusy || !state.supportsRecovery || (!hasSets && !hasText);
+      }
+
+      function isSemanticCategory(cluster) {
+        return Boolean(
+          cluster &&
+          ["category", "csv"].includes(state.clusterSource) &&
+          !["learned", "test-interp", "test-extrap", "all"].includes(cluster)
+        );
+      }
+
+      function pointMatchesCategoryFilter(point) {
+        if (!state.selectedCategories.size) return true;
+        return state.selectedCategories.has(point.cluster);
+      }
+
+      function updateCategoryLegend(points, clusterSource) {
+        const legend = $("#category-legend");
+        state.clusterSource = clusterSource || "none";
+        if (!["category", "csv"].includes(state.clusterSource)) {
+          state.selectedCategories.clear();
+          legend.hidden = true;
+          legend.classList.remove("has-selection");
+          legend.replaceChildren();
+          return;
+        }
+        const counts = new Map();
+        for (const point of points) {
+          if (point.kind !== "train") continue;
+          const cluster = point.cluster;
+          if (!isSemanticCategory(cluster)) continue;
+          counts.set(cluster, (counts.get(cluster) || 0) + 1);
+        }
+        const names = [...counts.keys()].sort((left, right) => {
+          const metaOrder = { "multi-cluster": 1, unknown: 2 };
+          const leftMeta = metaOrder[left] || 0;
+          const rightMeta = metaOrder[right] || 0;
+          if (leftMeta !== rightMeta) return leftMeta - rightMeta;
+          return left.localeCompare(right);
+        });
+        const available = new Set(names);
+        for (const name of [...state.selectedCategories]) {
+          if (!available.has(name)) state.selectedCategories.delete(name);
+        }
+        if (!names.length) {
+          state.selectedCategories.clear();
+          legend.hidden = true;
+          legend.classList.remove("has-selection");
+          legend.replaceChildren();
+          return;
+        }
+        const fragment = document.createDocumentFragment();
+        for (const name of names) {
+          const item = document.createElement("button");
+          item.type = "button";
+          item.className = "category-label";
+          item.dataset.category = name;
+          if (state.selectedCategories.has(name)) {
+            item.classList.add("is-active");
+          }
+          item.title = state.selectedCategories.has(name)
+            ? `${name} · ${counts.get(name)} original train · click to deselect`
+            : `${name} · ${counts.get(name)} original train · click to highlight`;
+          const swatch = document.createElement("i");
+          swatch.className = "dot";
+          swatch.style.background = colorFor(name);
+          item.append(swatch, document.createTextNode(name));
+          item.addEventListener("click", () => {
+            if (state.selectedCategories.has(name)) {
+              state.selectedCategories.delete(name);
+            } else {
+              state.selectedCategories.add(name);
+            }
+            updateCategoryLegend(state.points, state.clusterSource);
+            draw();
+          });
+          fragment.append(item);
+        }
+        legend.replaceChildren(fragment);
+        legend.classList.toggle(
+          "has-selection",
+          state.selectedCategories.size > 0
+        );
+        legend.hidden = false;
+      }
+
+      function visiblePoints() {
+        return state.points.filter((point) => {
+          if (!state.showTest && point.kind === "test") return false;
+          if (!state.missesOnly) return true;
+          const recovery = point.metadata?.recovery;
+          return (
+            ["train", "test"].includes(point.kind) &&
+            hasRecoveryEvaluation(recovery) &&
+            !recovery.effective_converged
+          );
+        });
+      }
+
+      function hasRecoveryEvaluation(recovery) {
+        return Boolean(
+          recovery?.baseline_scanned ||
+          recovery?.recovery_evaluated ||
+          recovery?.learned_converged !== undefined
+        );
+      }
+
+      function resizeCanvas() {
+        const rect = wrap.getBoundingClientRect();
+        const ratio = window.devicePixelRatio || 1;
+        canvas.width = Math.max(1, Math.round(rect.width * ratio));
+        canvas.height = Math.max(1, Math.round(rect.height * ratio));
+        ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+        draw();
+      }
+
+      function plotRect() {
+        return { left: 55, top: 25, right: canvas.clientWidth - 24, bottom: canvas.clientHeight - 43 };
+      }
+
+      function worldToScreen(x, y) {
+        const p = plotRect(), v = state.view;
+        return {
+          x: p.left + ((x - v.min_x) / (v.max_x - v.min_x)) * (p.right - p.left),
+          y: p.bottom - ((y - v.min_y) / (v.max_y - v.min_y)) * (p.bottom - p.top),
+        };
+      }
+
+      function screenToWorld(x, y) {
+        const p = plotRect(), v = state.view;
+        return {
+          x: v.min_x + ((x - p.left) / (p.right - p.left)) * (v.max_x - v.min_x),
+          y: v.min_y + ((p.bottom - y) / (p.bottom - p.top)) * (v.max_y - v.min_y),
+        };
+      }
+
+      function centerViewOn(x, y) {
+        const spanX = state.view.max_x - state.view.min_x;
+        const spanY = state.view.max_y - state.view.min_y;
+        state.view = {
+          min_x: x - spanX / 2,
+          max_x: x + spanX / 2,
+          min_y: y - spanY / 2,
+          max_y: y + spanY / 2,
+        };
+      }
+
+      function gridStep(span) {
+        const raw = span / 6;
+        const power = 10 ** Math.floor(Math.log10(raw));
+        const normalized = raw / power;
+        return (normalized < 2 ? 1 : normalized < 5 ? 2 : 5) * power;
+      }
+
+      function draw() {
+        const width = canvas.clientWidth, height = canvas.clientHeight;
+        ctx.clearRect(0, 0, width, height);
+        if (!state.view) return;
+        const p = plotRect(), v = state.view;
+        ctx.fillStyle = "#0b0f16";
+        ctx.fillRect(p.left, p.top, p.right - p.left, p.bottom - p.top);
+        ctx.font = "11px ui-monospace, SFMono-Regular, Menlo, monospace";
+        ctx.lineWidth = 1;
+        ctx.strokeStyle = "#232b38";
+        ctx.fillStyle = "#778397";
+        const xStep = gridStep(v.max_x - v.min_x);
+        const yStep = gridStep(v.max_y - v.min_y);
+        for (let x = Math.ceil(v.min_x / xStep) * xStep; x <= v.max_x; x += xStep) {
+          const s = worldToScreen(x, 0);
+          ctx.beginPath(); ctx.moveTo(s.x, p.top); ctx.lineTo(s.x, p.bottom); ctx.stroke();
+          ctx.fillText(x.toFixed(Math.max(0, -Math.floor(Math.log10(xStep)))), s.x - 12, p.bottom + 17);
+        }
+        for (let y = Math.ceil(v.min_y / yStep) * yStep; y <= v.max_y; y += yStep) {
+          const s = worldToScreen(0, y);
+          ctx.beginPath(); ctx.moveTo(p.left, s.y); ctx.lineTo(p.right, s.y); ctx.stroke();
+          ctx.fillText(y.toFixed(Math.max(0, -Math.floor(Math.log10(yStep)))), 7, s.y + 4);
+        }
+        ctx.save();
+        ctx.beginPath(); ctx.rect(p.left, p.top, p.right - p.left, p.bottom - p.top); ctx.clip();
+        for (const point of visiblePoints()) {
+          const s = worldToScreen(point.x, point.y);
+          const searchMatch =
+            !state.search || point.label.toLowerCase().includes(state.search);
+          const match = searchMatch && pointMatchesCategoryFilter(point);
+          const selected = state.selected?.id === point.id;
+          const hovered = state.hovered?.id === point.id;
+          const radius = selected || hovered ? 7 : point.kind === "learned" ? 5.5 : 4;
+          const seen = point.metadata?.seen !== false;
+          ctx.globalAlpha = match ? 0.92 : 0.14;
+          ctx.fillStyle = seen ? colorFor(point.cluster) : "#0b0f16";
+          ctx.strokeStyle = selected
+            ? "#ffffff"
+            : !seen || point.kind === "test"
+              ? colorFor(point.cluster)
+              : "#09101a";
+          ctx.lineWidth = selected ? 2.5 : 1;
+          ctx.setLineDash(point.kind === "test" ? [4, 3] : []);
+          ctx.beginPath();
+          if (point.kind === "learned") {
+            ctx.moveTo(s.x, s.y - radius); ctx.lineTo(s.x + radius, s.y);
+            ctx.lineTo(s.x, s.y + radius); ctx.lineTo(s.x - radius, s.y); ctx.closePath();
+          } else {
+            ctx.arc(s.x, s.y, radius, 0, Math.PI * 2);
+          }
+          ctx.fill(); ctx.stroke();
+          const recovery = point.metadata?.recovery;
+          if (hasRecoveryEvaluation(recovery)) {
+            ctx.setLineDash([]);
+            ctx.globalAlpha = match ? 1 : 0.2;
+            ctx.strokeStyle = recovery.effective_converged ? "#68d391" : "#ff6b7a";
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.arc(s.x, s.y, radius + 3, 0, Math.PI * 2);
+            ctx.stroke();
+          }
+        }
+        ctx.setLineDash([]);
+        if (["coordinate", "text"].includes(state.selected?.kind)) {
+          const s = worldToScreen(state.selected.x, state.selected.y);
+          ctx.globalAlpha = 1; ctx.strokeStyle = "#ffffff"; ctx.lineWidth = 2;
+          ctx.beginPath(); ctx.arc(s.x, s.y, 8, 0, Math.PI * 2); ctx.stroke();
+          ctx.beginPath(); ctx.moveTo(s.x - 12, s.y); ctx.lineTo(s.x + 12, s.y);
+          ctx.moveTo(s.x, s.y - 12); ctx.lineTo(s.x, s.y + 12); ctx.stroke();
+        }
+        ctx.restore();
+        ctx.globalAlpha = 1;
+      }
+
+      function canvasPosition(event) {
+        const rect = canvas.getBoundingClientRect();
+        return { x: event.clientX - rect.left, y: event.clientY - rect.top };
+      }
+
+      function nearestPoint(screen, maxDistance = 10) {
+        let nearest = null, best = maxDistance ** 2;
+        for (const point of visiblePoints()) {
+          const s = worldToScreen(point.x, point.y);
+          const distance = (s.x - screen.x) ** 2 + (s.y - screen.y) ** 2;
+          if (distance < best) { best = distance; nearest = point; }
+        }
+        return nearest;
+      }
+
+      function showTooltip(point, screen) {
+        if (!point) { tooltip.style.display = "none"; return; }
+        const lines = [`${point.label} · ${point.kind}`];
+        if (isSemanticCategory(point.cluster)) {
+          lines.push(`Category: ${point.cluster}`);
+        }
+        if (point.metadata?.original_split) {
+          lines.push(
+            `Original split: ${point.metadata.original_split} · ` +
+            `${point.metadata.seen === false ? "unseen" : "seen"}`
+          );
+        }
+        if (Number.isFinite(Number(point.bias_norm))) {
+          lines.push(`Bias ‖μ‖: ${Number(point.bias_norm).toFixed(3)}`);
+        }
+        if (point.metadata?.split) lines.push(`Split: ${point.metadata.split}`);
+        if (point.metadata?.definition) {
+          lines.push(`Definition: ${point.metadata.definition}`);
+        } else if (!isSemanticCategory(point.cluster) && point.cluster) {
+          lines.push(`Group: ${point.cluster}`);
+        }
+        const recovery = point.metadata?.recovery;
+        if (recovery?.baseline_scanned) {
+          lines.push(
+            `Baseline recall@${recovery.n_samples}: ` +
+            (recovery.baseline_converged ? "hit" : "MISS")
+          );
+          lines.push(`Baseline decode: ${recovery.baseline_decode || "—"}`);
+        }
+        if (recovery?.learned_converged !== undefined) {
+          lines.push(
+            `Post-training recall@n: ${recovery.learned_converged ? "hit" : "MISS"}`
+          );
+          if (recovery.learned_decode) {
+            lines.push(`Learned decode: ${recovery.learned_decode}`);
+          }
+        }
+        if (recovery?.optimizer_converged !== undefined) {
+          lines.push(
+            `Optimizer criterion: ${recovery.optimizer_converged ? "converged" : "not converged"}`
+          );
+        }
+        tooltip.textContent = lines.join("\n");
+        tooltip.style.whiteSpace = "pre-wrap";
+        tooltip.style.display = "block";
+        tooltip.style.left = `${Math.min(screen.x + 13, wrap.clientWidth - 280)}px`;
+        tooltip.style.top = `${Math.max(8, screen.y - 12)}px`;
+      }
+
+      async function activate(payload, selected) {
+        return enqueueOperation(async () => {
+          try {
+            const result = await api("/api/activate", {
+              method: "POST",
+              body: JSON.stringify({ session_id: sessionId, ...payload }),
+            });
+            state.selected = selected;
+            $("#active").textContent = `${result.mode}: ${result.label}`;
+            setHasTarget(result.target);
+            updateRecoveryButtons();
+            draw();
+          } catch (error) {
+            showError(error);
+          }
+        });
+      }
+
+      async function activateText(text) {
+        return enqueueOperation(async () => {
+          const result = await api("/api/activate-text", {
+            method: "POST",
+            body: JSON.stringify({ session_id: sessionId, text }),
+          });
+          state.selected = {
+            id: "text",
+            kind: "text",
+            x: result.point.x,
+            y: result.point.y,
+          };
+          centerViewOn(result.point.x, result.point.y);
+          $("#active").textContent = `${result.mode}: ${result.label}`;
+          setHasTarget(result.target);
+          updateRecoveryButtons();
+          draw();
+        });
+      }
+
+      function setHasTarget(target) {
+        state.hasTarget = target != null && String(target).length > 0;
+        const toggle = $("#show-similarity");
+        if (!toggle) return;
+        toggle.disabled = !state.hasTarget;
+        if (!state.hasTarget) toggle.checked = false;
+        toggle.parentElement.title = state.hasTarget
+          ? "Score each reply against the activated target"
+          : "Select a point with a known target to enable similarity";
+      }
+
+      function setRecoveryStatus(text, title = text, { pending = false } = {}) {
+        for (const id of ["recovery-status", "recovery-modal-status"]) {
+          const el = $(`#${id}`);
+          if (!el) continue;
+          el.classList.toggle("is-pending", pending);
+          el.setAttribute("aria-busy", pending ? "true" : "false");
+          const textEl = el.querySelector(".status-text") || el;
+          textEl.textContent = text;
+          el.title = title;
+        }
+      }
+
+      function openRecoveryPanel() {
+        const modal = $("#recovery-modal");
+        modal.hidden = false;
+        modal.classList.add("open");
+        $("#close-recovery-panel").focus();
+        const liveHistory =
+          state.activeRecoveryJob?.eval_history ||
+          state.activeRecoveryJob?.result?.eval_history ||
+          state.lastRecoveryTrainResult?.eval_history ||
+          [];
+        renderEmbedSimPlot(liveHistory, {
+          stopThreshold: readStopThreshold(),
+          stopThresholdMin: readStopThresholdMin(),
+        });
+        const lossHistory =
+          state.activeRecoveryJob?.loss_history ||
+          state.activeRecoveryJob?.result?.loss_history ||
+          state.lastRecoveryTrainResult?.loss_history ||
+          [];
+        renderLossPlot(lossHistory);
+        updateEffectiveConfigSummary();
+      }
+
+      function closeRecoveryPanel() {
+        const modal = $("#recovery-modal");
+        modal.classList.remove("open");
+        modal.hidden = true;
+      }
+
+      function formatDelta(value) {
+        if (value === null || value === undefined || Number.isNaN(value)) return "—";
+        if (value === 0) return "0";
+        if (Math.abs(value) < 1e-4 || Math.abs(value) >= 1e3) {
+          return value.toExponential(2);
+        }
+        return value.toFixed(4);
+      }
+
+      function renderDeltaTable(tableId, changes) {
+        const body = $(`#${tableId} tbody`);
+        const labels = {
+          W: "W (learned_source)",
+          R: "R (rotate_layer)",
+          bias_network: "Bias network",
+          encoder: "Encoder LoRA",
+        };
+        const fragment = document.createDocumentFragment();
+        for (const key of ["W", "R", "bias_network", "encoder"]) {
+          const row = document.createElement("tr");
+          const metrics = changes?.[key] || {
+            status: "n/a",
+            relative_l2: null,
+            absolute_l2: null,
+          };
+          const status =
+            metrics.status === "unchanged"
+              ? "unchanged"
+              : metrics.status === "changed"
+                ? "changed"
+                : "n/a";
+          row.innerHTML =
+            `<td>${labels[key]}</td>` +
+            `<td class="num ${metrics.relative_l2 == null ? "na" : ""}">${formatDelta(metrics.relative_l2)}</td>` +
+            `<td class="num ${metrics.absolute_l2 == null ? "na" : ""}">${formatDelta(metrics.absolute_l2)}</td>` +
+            `<td class="${status === "n/a" || status === "unchanged" ? "na" : ""}">${status}</td>`;
+          fragment.append(row);
+        }
+        body.replaceChildren(fragment);
+      }
+
+      function renderRecoveryOutcome(result) {
+        if (!result) {
+          $("#recovery-outcome").textContent = "No recovery train yet.";
+          renderDeltaTable("delta-previous", null);
+          renderDeltaTable("delta-original", null);
+          renderEmbedSimPlot([], {
+            stopThreshold: readStopThreshold(),
+            stopThresholdMin: readStopThresholdMin(),
+          });
+          return;
+        }
+        const checkpointName =
+          (result.checkpoint_dir || "").split("/").filter(Boolean).pop() || "—";
+        const geometryNote = result.geometry_refreshed
+          ? "PCA refit"
+          : "geometry unchanged";
+        $("#recovery-outcome").innerHTML =
+          `<div><strong>${result.stopped_early ? "Stopped early" : "Complete"}</strong>` +
+          ` · ${result.n_converged}/${result.n_evaluated} converged` +
+          ` · ${result.n_trained} trained</div>` +
+          `<div>loss=${Number(result.mean_train_loss).toFixed(4)}` +
+          ` · steps=${result.steps} · ${geometryNote}</div>` +
+          `<div>checkpoint: ${checkpointName}</div>`;
+        renderDeltaTable("delta-previous", result.parameter_changes?.vs_previous);
+        renderDeltaTable("delta-original", result.parameter_changes?.vs_original);
+        renderEmbedSimPlot(result.eval_history || [], {
+          stopThreshold: readStopThreshold(),
+          stopThresholdMin: readStopThresholdMin(),
+        });
+      }
+
+      function recoveryMissIds(kind) {
+        return state.points
+          .filter((point) => {
+            const recovery = point.metadata?.recovery;
+            return (
+              point.kind === kind &&
+              hasRecoveryEvaluation(recovery) &&
+              !recovery.effective_converged
+            );
+          })
+          .map((point) => point.id);
+      }
+
+      function selectedHasLearnedBias() {
+        const point = state.selected;
+        if (!point) return false;
+        if (point.id?.startsWith("learned:")) return true;
+        if (!["train", "test"].includes(point.kind)) return false;
+        const recovery = point.metadata?.recovery;
+        return (
+          recovery?.learned_converged !== undefined ||
+          recovery?.recovery_evaluated ||
+          Boolean(recovery?.learned_decode) ||
+          Boolean(recovery?.learned_at)
+        );
+      }
+
+      function updateRecoveryButtons() {
+        const recovery = state.selected?.metadata?.recovery;
+        const isCandidate = ["train", "test"].includes(state.selected?.kind);
+        const isMiss =
+          hasRecoveryEvaluation(recovery) && !recovery.effective_converged;
+        const trainMisses = recoveryMissIds("train");
+        const testMisses = recoveryMissIds("test");
+        $("#recover-selected").disabled =
+          state.recoveryBusy || !state.supportsRecovery || !isCandidate || !isMiss;
+        $("#delete-learned").disabled =
+          state.recoveryBusy || !state.supportsRecovery || !selectedHasLearnedBias();
+        $("#recover-train-misses").disabled =
+          state.recoveryBusy || !state.supportsRecovery || trainMisses.length === 0;
+        $("#recover-train-misses").textContent = trainMisses.length
+          ? `Recover original-train misses (${trainMisses.length})`
+          : "Recover original-train misses";
+        $("#recover-test-misses").disabled =
+          state.recoveryBusy || !state.supportsRecovery || testMisses.length === 0;
+        $("#recover-test-misses").textContent = testMisses.length
+          ? `Recover original-test misses (${testMisses.length})`
+          : "Recover original-test misses";
+        const klInput = $("#recovery-kl-beta");
+        const vaeModule = $("#recovery-vae-module");
+        const sdpoModule = $("#recovery-sdpo-module");
+        if (vaeModule) vaeModule.hidden = !state.isVae;
+        if (sdpoModule) sdpoModule.hidden = !state.supportsSdpo;
+        syncLossModuleDefaults();
+        updateLossModuleEnabledState();
+        if (
+          klInput &&
+          state.isVae &&
+          state.checkpointKlBeta != null &&
+          !klInput.dataset.userEdited
+        ) {
+          klInput.placeholder = String(state.checkpointKlBeta);
+        }
+        const ceInput = $("#recovery-lambda-ce");
+        if (
+          ceInput &&
+          state.checkpointLambdaCe != null &&
+          !ceInput.dataset.userEdited
+        ) {
+          ceInput.placeholder = String(state.checkpointLambdaCe);
+        }
+        const sdpoInput = $("#recovery-lambda-sdpo");
+        if (
+          sdpoInput &&
+          state.checkpointLambdaSdpo != null &&
+          !sdpoInput.dataset.userEdited
+        ) {
+          sdpoInput.placeholder = String(state.checkpointLambdaSdpo);
+        }
+      }
+
+      function syncLossModuleDefaults() {
+        if (state.lossModulesInitialized) return;
+        const ceOn = (state.checkpointLambdaCe ?? 1) > 0;
+        const vaeOn = state.isVae && (state.checkpointKlBeta ?? 0) > 0;
+        const sdpoOn = state.supportsSdpo && (state.checkpointLambdaSdpo ?? 0) > 0;
+        const wdMode = state.checkpointWeightDecayMode || "none";
+        const wdOn = wdMode !== "none";
+        $("#recovery-ce").checked = ceOn;
+        $("#recovery-vae").checked = vaeOn;
+        $("#recovery-sdpo").checked = sdpoOn;
+        $("#recovery-wd").checked = wdOn;
+        const modeSelect = $("#recovery-wd-mode");
+        if (modeSelect && !modeSelect.dataset.userEdited) {
+          modeSelect.value = "auto";
+        }
+        state.lossModulesInitialized = true;
+      }
+
+      function updateLossModuleEnabledState() {
+        const busy = state.recoveryBusy || !state.supportsRecovery;
+        const ceOn = $("#recovery-ce").checked;
+        const vaeOn = $("#recovery-vae").checked;
+        const sdpoOn = $("#recovery-sdpo").checked;
+        const wdOn = $("#recovery-wd").checked;
+        $("#recovery-ce").disabled = busy;
+        $("#recovery-lambda-ce").disabled = busy || !ceOn;
+        $("#recovery-vae").disabled = busy || !state.isVae;
+        $("#recovery-kl-beta").disabled = busy || !state.isVae || !vaeOn;
+        $("#recovery-sdpo").disabled = busy || !state.supportsSdpo;
+        $("#recovery-lambda-sdpo").disabled = busy || !state.supportsSdpo || !sdpoOn;
+        $("#recovery-wd").disabled = busy;
+        $("#recovery-wd-mode").disabled = busy || !wdOn;
+        $("#recovery-wd-w").disabled = busy || !wdOn;
+        $("#recovery-wd-b").disabled = busy || !wdOn;
+        $("#recovery-scheduler").disabled = busy;
+        $("#recovery-warmup").disabled = busy;
+        $("#recovery-annealing-map").disabled = busy;
+        updateEffectiveConfigSummary();
+      }
+
+      function formatConfigNumber(value, digits = 4) {
+        if (!Number.isFinite(value)) return "auto";
+        if (value === 0) return "0";
+        if (Math.abs(value) < 1e-3 || Math.abs(value) >= 1e3) {
+          return value.toExponential(2);
+        }
+        const text = value.toFixed(digits);
+        return text.replace(/\.?0+$/, "");
+      }
+
+      function resolveEffectiveRecoveryConfig() {
+        const epochs = Number.parseInt($("#recovery-epochs").value, 10);
+        const lr = Number.parseFloat($("#recovery-lr").value);
+        const schedulerRaw = $("#recovery-scheduler").value;
+        const scheduler =
+          schedulerRaw && schedulerRaw !== "auto"
+            ? schedulerRaw
+            : state.checkpointScheduler || "linear";
+        const warmupRaw = Number.parseFloat($("#recovery-warmup").value);
+        const warmup = Number.isFinite(warmupRaw)
+          ? warmupRaw
+          : state.checkpointWarmup ?? 0;
+
+        let lambdaCe = 0;
+        if ($("#recovery-ce").checked) {
+          const parsed = Number.parseFloat($("#recovery-lambda-ce").value);
+          lambdaCe = Number.isFinite(parsed) && parsed >= 0
+            ? parsed
+            : (state.checkpointLambdaCe != null && state.checkpointLambdaCe > 0
+              ? state.checkpointLambdaCe
+              : 1);
+        }
+
+        let klBeta = null;
+        if (state.isVae) {
+          if (!$("#recovery-vae").checked) {
+            klBeta = 0;
+          } else {
+            const parsed = Number.parseFloat($("#recovery-kl-beta").value);
+            klBeta = Number.isFinite(parsed) && parsed >= 0
+              ? parsed
+              : (state.checkpointKlBeta ?? 0);
+          }
+        }
+
+        let lambdaSdpo = null;
+        if (state.supportsSdpo) {
+          if (!$("#recovery-sdpo").checked) {
+            lambdaSdpo = 0;
+          } else {
+            const parsed = Number.parseFloat($("#recovery-lambda-sdpo").value);
+            lambdaSdpo = Number.isFinite(parsed) && parsed >= 0
+              ? parsed
+              : (state.checkpointLambdaSdpo != null && state.checkpointLambdaSdpo > 0
+                ? state.checkpointLambdaSdpo
+                : 1);
+          }
+        }
+
+        let wdMode = "none";
+        let wdW = null;
+        let wdB = null;
+        if ($("#recovery-wd").checked) {
+          const mode = $("#recovery-wd-mode").value;
+          wdMode =
+            mode && mode !== "auto"
+              ? mode
+              : (state.checkpointWeightDecayMode &&
+                state.checkpointWeightDecayMode !== "none"
+                ? state.checkpointWeightDecayMode
+                : "W_and_b");
+          const parsedW = Number.parseFloat($("#recovery-wd-w").value);
+          const parsedB = Number.parseFloat($("#recovery-wd-b").value);
+          wdW = Number.isFinite(parsedW) && parsedW >= 0
+            ? parsedW
+            : state.checkpointWdW;
+          wdB = Number.isFinite(parsedB) && parsedB >= 0
+            ? parsedB
+            : state.checkpointWdB;
+        }
+
+        const annealRaw = ($("#recovery-annealing-map").value || "").trim();
+        let annealingMap = "auto";
+        if (!annealRaw) {
+          annealingMap = state.checkpointAnnealingMapCli || "off";
+        } else if (annealRaw === "none" || annealRaw === "off") {
+          annealingMap = "off";
+        } else {
+          annealingMap = annealRaw;
+        }
+
+        return {
+          epochs: Number.isFinite(epochs) && epochs > 0 ? epochs : null,
+          lr: Number.isFinite(lr) && lr > 0 ? lr : null,
+          scheduler,
+          warmup,
+          lambdaCe,
+          klBeta,
+          lambdaSdpo,
+          annealingMap,
+          wdMode,
+          wdW,
+          wdB,
+          learnW: $("#learn-w").checked,
+          learnR: $("#learn-r").checked,
+          learnBiasNetwork: $("#learn-bias-network").checked,
+          includePrevious: $("#include-previous").checked,
+          trainingSets: checkedSetValues("input.training-set"),
+        };
+      }
+
+      function updateEffectiveConfigSummary() {
+        const el = $("#effective-config");
+        if (!el) return;
+        const cfg = resolveEffectiveRecoveryConfig();
+        const parts = [
+          `CE λ=${formatConfigNumber(cfg.lambdaCe)}`,
+        ];
+        if (cfg.klBeta != null) {
+          parts.push(`KL β=${formatConfigNumber(cfg.klBeta)}`);
+        }
+        if (cfg.lambdaSdpo != null) {
+          parts.push(
+            cfg.lambdaSdpo > 0
+              ? `SDPO λ=${formatConfigNumber(cfg.lambdaSdpo)}`
+              : "SDPO off"
+          );
+        }
+        if (cfg.wdMode === "none") {
+          parts.push("WD off");
+        } else {
+          const coeffs = [];
+          if (cfg.wdW != null) coeffs.push(`W=${formatConfigNumber(cfg.wdW)}`);
+          if (cfg.wdB != null) coeffs.push(`b=${formatConfigNumber(cfg.wdB)}`);
+          parts.push(
+            `WD=${cfg.wdMode}${coeffs.length ? ` (${coeffs.join(", ")})` : ""}`
+          );
+        }
+        parts.push(`lr=${cfg.lr != null ? formatConfigNumber(cfg.lr) : "auto"}`);
+        parts.push(`sched=${cfg.scheduler}`);
+        parts.push(`warmup=${formatConfigNumber(cfg.warmup)}`);
+        parts.push(
+          cfg.annealingMap === "off"
+            ? "anneal off"
+            : `anneal=${cfg.annealingMap}`
+        );
+        if (cfg.epochs != null) parts.push(`epochs=${cfg.epochs}`);
+        const learn = [
+          cfg.learnW ? "W" : null,
+          cfg.learnR ? "R" : null,
+          cfg.learnBiasNetwork ? "net" : null,
+        ].filter(Boolean);
+        parts.push(learn.length ? `learn ${learn.join("+")}` : "biases only");
+        if (cfg.includePrevious) parts.push("rehearse");
+        if (cfg.trainingSets.length) {
+          parts.push(
+            `sets=${cfg.trainingSets.map((key) => pointSetLabels[key] || key).join(", ")}`
+          );
+        }
+        el.textContent = `Effective: ${parts.join(" · ")}`;
+      }
+
+      function setRecoveryBusy(busy) {
+        state.recoveryBusy = busy;
+        $("#scan-recovery").disabled = busy || !state.supportsRecovery;
+        $("#open-recovery-panel").disabled = !state.supportsRecovery;
+        $("#recover-selected").disabled = busy;
+        $("#delete-learned").disabled = busy;
+        $("#recover-train-misses").disabled = busy;
+        $("#recover-test-misses").disabled = busy;
+        $("#train-new-target").disabled = busy || !state.supportsRecovery;
+        $("#new-target").disabled = busy || !state.supportsRecovery;
+        $("#new-definition").disabled = busy || !state.supportsRecovery;
+        $("#learn-w").disabled = busy || !state.supportsRecovery;
+        $("#learn-r").disabled = busy || !state.supportsRecovery;
+        $("#learn-bias-network").disabled = busy || !state.supportsRecovery;
+        $("#include-previous").disabled = busy || !state.supportsRecovery;
+        $("#recovery-epochs").disabled = busy || !state.supportsRecovery;
+        $("#recovery-lr").disabled = busy || !state.supportsRecovery;
+        $("#recovery-scheduler").disabled = busy || !state.supportsRecovery;
+        $("#recovery-warmup").disabled = busy || !state.supportsRecovery;
+        $("#recovery-annealing-map").disabled = busy || !state.supportsRecovery;
+        $("#recovery-eval-epochs").disabled = busy || !state.supportsRecovery;
+        $("#recovery-stop-threshold").disabled = busy || !state.supportsRecovery;
+        $("#recovery-stop-threshold-min").disabled = busy || !state.supportsRecovery;
+        $("#recovery-stop-threshold-frac").disabled = busy || !state.supportsRecovery;
+        $("#additional-learning-targets").disabled =
+          busy || !state.supportsRecovery;
+        $("#apply-pca-sets").disabled = busy;
+        for (const input of document.querySelectorAll(
+          "input.pca-set, input.training-set"
+        )) {
+          input.disabled =
+            busy || Number(state.setCounts[input.value] || 0) === 0;
+        }
+        $("#send").disabled = busy || state.busy;
+        $("#activate-text").disabled = busy || !state.supportsText;
+        updateTrainingControlButtons();
+        updateRecoveryButtons();
+        updateTrainingSetButton();
+      }
+
+      function updateTrainingControlButtons() {
+        const job = state.activeRecoveryJob;
+        const controllable =
+          state.recoveryBusy &&
+          job?.type === "train" &&
+          job?.phase === "training" &&
+          ["queued", "running"].includes(job?.status) &&
+          !["stopping", "stopped"].includes(job?.training_state);
+        const paused = ["pausing", "paused"].includes(job?.training_state);
+        $("#pause-training").disabled = !controllable;
+        $("#pause-training").textContent = paused ? "Resume" : "Pause";
+        $("#stop-training").disabled = !controllable;
+      }
+
+      function recoveryTrainPayload(pointIds, extra = {}) {
+        const payload = {
+          point_ids: pointIds,
+          training_sets: checkedSetValues("input.training-set"),
+          learn_W: $("#learn-w").checked,
+          learn_R: $("#learn-r").checked,
+          learn_bias_network: $("#learn-bias-network").checked,
+          include_previous_targets: $("#include-previous").checked,
+          ...extra,
+        };
+        const epochs = Number.parseInt($("#recovery-epochs").value, 10);
+        if (Number.isFinite(epochs) && epochs > 0) payload.epochs = epochs;
+        const learningRate = Number.parseFloat($("#recovery-lr").value);
+        if (Number.isFinite(learningRate) && learningRate > 0) {
+          payload.lr = learningRate;
+        }
+        const evalEpochs = Number.parseInt($("#recovery-eval-epochs").value, 10);
+        if (Number.isFinite(evalEpochs) && evalEpochs > 0) {
+          payload.eval_epochs = evalEpochs;
+        }
+        const stopThreshold = Number.parseFloat($("#recovery-stop-threshold").value);
+        if (Number.isFinite(stopThreshold) && stopThreshold >= 0) {
+          payload.stop_threshold = stopThreshold;
+        }
+        const stopThresholdMin = Number.parseFloat(
+          $("#recovery-stop-threshold-min").value
+        );
+        if (Number.isFinite(stopThresholdMin) && stopThresholdMin >= 0) {
+          payload.stop_threshold_min = stopThresholdMin;
+        }
+        const stopThresholdFrac = Number.parseFloat(
+          $("#recovery-stop-threshold-frac").value
+        );
+        if (Number.isFinite(stopThresholdFrac) && stopThresholdFrac > 0) {
+          payload.stop_threshold_frac = stopThresholdFrac;
+        }
+        // Omit blank loss weights so recovery inherits checkpoint coeffs and
+        // preserves annealed ends (cool-downs). Only send overrides / disables.
+        if (!$("#recovery-ce").checked) {
+          payload.lambda_ce = 0;
+        } else {
+          const lambdaCe = Number.parseFloat($("#recovery-lambda-ce").value);
+          if (Number.isFinite(lambdaCe) && lambdaCe >= 0) {
+            payload.lambda_ce = lambdaCe;
+          }
+        }
+        if (state.isVae) {
+          if (!$("#recovery-vae").checked) {
+            payload.kl_beta = 0;
+          } else {
+            const klBeta = Number.parseFloat($("#recovery-kl-beta").value);
+            if (Number.isFinite(klBeta) && klBeta >= 0) {
+              payload.kl_beta = klBeta;
+            }
+          }
+        }
+        if (state.supportsSdpo) {
+          if (!$("#recovery-sdpo").checked) {
+            payload.lambda_sdpo = 0;
+          } else {
+            const lambdaSdpo = Number.parseFloat($("#recovery-lambda-sdpo").value);
+            if (Number.isFinite(lambdaSdpo) && lambdaSdpo >= 0) {
+              payload.lambda_sdpo = lambdaSdpo;
+            }
+          }
+        }
+        if (!$("#recovery-wd").checked) {
+          payload.weight_decay_mode = "none";
+        } else {
+          const mode = $("#recovery-wd-mode").value;
+          if (mode && mode !== "auto") {
+            payload.weight_decay_mode = mode;
+          } else if (
+            state.checkpointWeightDecayMode &&
+            state.checkpointWeightDecayMode !== "none"
+          ) {
+            payload.weight_decay_mode = state.checkpointWeightDecayMode;
+          } else {
+            payload.weight_decay_mode = "W_and_b";
+          }
+          const wdW = Number.parseFloat($("#recovery-wd-w").value);
+          if (Number.isFinite(wdW) && wdW >= 0) payload.wd_W = wdW;
+          const wdB = Number.parseFloat($("#recovery-wd-b").value);
+          if (Number.isFinite(wdB) && wdB >= 0) payload.wd_b = wdB;
+        }
+        const scheduler = $("#recovery-scheduler").value;
+        if (scheduler && scheduler !== "auto") {
+          payload.lr_scheduler_type = scheduler;
+        }
+        const warmup = Number.parseFloat($("#recovery-warmup").value);
+        if (Number.isFinite(warmup) && warmup >= 0) {
+          payload.warmup_ratio = warmup;
+        }
+        const annealRaw = ($("#recovery-annealing-map").value || "").trim();
+        if (annealRaw === "none" || annealRaw === "off") {
+          payload.linear_annealing_map = "";
+        } else if (annealRaw) {
+          payload.linear_annealing_map = annealRaw;
+        }
+        return payload;
+      }
+
+      function readStopThreshold() {
+        const value = Number.parseFloat($("#recovery-stop-threshold").value);
+        return Number.isFinite(value) ? value : null;
+      }
+
+      function readStopThresholdMin() {
+        const value = Number.parseFloat($("#recovery-stop-threshold-min").value);
+        return Number.isFinite(value) ? value : null;
+      }
+
+      function hideEmbedSimTooltip() {
+        const tip = $("#embed-sim-tooltip");
+        if (tip) tip.style.display = "none";
+      }
+
+      function showEmbedSimTooltip(hit, clientX, clientY) {
+        const tip = $("#embed-sim-tooltip");
+        const wrap = tip?.parentElement;
+        if (!tip || !wrap || !hit) {
+          hideEmbedSimTooltip();
+          return;
+        }
+        const lines = [`Epoch ${hit.epoch}`];
+        if (Number.isFinite(hit.avg)) lines.push(`Mean embed sim: ${hit.avg.toFixed(4)}`);
+        if (hit.min != null && Number.isFinite(hit.min)) {
+          lines.push(`Min embed sim: ${hit.min.toFixed(4)}`);
+        }
+        if (hit.nRecovered != null && hit.nTargets != null) {
+          lines.push(`Recovered: ${hit.nRecovered}/${hit.nTargets}`);
+        } else if (hit.nRecovered != null) {
+          lines.push(`Recovered: ${hit.nRecovered}`);
+        }
+        if (hit.step != null && Number.isFinite(hit.step)) {
+          lines.push(`Step: ${hit.step}`);
+        }
+        tip.textContent = lines.join("\n");
+        tip.style.display = "block";
+        const rect = wrap.getBoundingClientRect();
+        const localX = clientX - rect.left;
+        const localY = clientY - rect.top;
+        const tipWidth = tip.offsetWidth || 160;
+        const tipHeight = tip.offsetHeight || 60;
+        tip.style.left = `${Math.min(localX + 12, rect.width - tipWidth - 8)}px`;
+        tip.style.top = `${Math.max(8, localY - tipHeight - 8)}px`;
+      }
+
+      function nearestEmbedSimHit(canvasX, canvasY, maxDistance = 12) {
+        let best = null;
+        let bestDist = maxDistance ** 2;
+        for (const hit of state.embedSimPlotHits || []) {
+          const dist =
+            (hit.x - canvasX) ** 2 + (hit.y - canvasY) ** 2;
+          if (dist < bestDist) {
+            bestDist = dist;
+            best = hit;
+          }
+        }
+        return best;
+      }
+
+      function hideLossTooltip() {
+        const tip = $("#loss-tooltip");
+        if (tip) tip.style.display = "none";
+      }
+
+      function showLossTooltip(hit, clientX, clientY) {
+        const tip = $("#loss-tooltip");
+        const wrap = tip?.parentElement;
+        if (!tip || !wrap || !hit) {
+          hideLossTooltip();
+          return;
+        }
+        const lines = [`Step ${hit.step}`];
+        if (Number.isFinite(hit.loss)) lines.push(`Loss: ${hit.loss.toFixed(4)}`);
+        if (hit.learningRate != null && Number.isFinite(hit.learningRate)) {
+          lines.push(`LR: ${hit.learningRate.toExponential(2)}`);
+        }
+        if (hit.gradNorm != null && Number.isFinite(hit.gradNorm)) {
+          lines.push(`Grad: ${hit.gradNorm.toFixed(3)}`);
+        }
+        if (hit.epoch != null && Number.isFinite(hit.epoch)) {
+          lines.push(`Epoch: ${hit.epoch.toFixed(2)}`);
+        }
+        tip.textContent = lines.join("\n");
+        tip.style.display = "block";
+        const rect = wrap.getBoundingClientRect();
+        const localX = clientX - rect.left;
+        const localY = clientY - rect.top;
+        const tipWidth = tip.offsetWidth || 160;
+        const tipHeight = tip.offsetHeight || 60;
+        tip.style.left = `${Math.min(localX + 12, rect.width - tipWidth - 8)}px`;
+        tip.style.top = `${Math.max(8, localY - tipHeight - 8)}px`;
+      }
+
+      function nearestLossHit(canvasX, canvasY, maxDistance = 12) {
+        let best = null;
+        let bestDist = maxDistance ** 2;
+        for (const hit of state.lossPlotHits || []) {
+          const dist = (hit.x - canvasX) ** 2 + (hit.y - canvasY) ** 2;
+          if (dist < bestDist) {
+            bestDist = dist;
+            best = hit;
+          }
+        }
+        return best;
+      }
+
+      function renderLossPlot(history) {
+        const canvas = $("#loss-plot");
+        if (!canvas) return;
+        const plotCtx = canvas.getContext("2d");
+        const dpr = window.devicePixelRatio || 1;
+        const cssWidth = canvas.clientWidth || 600;
+        const cssHeight = 160;
+        canvas.width = Math.round(cssWidth * dpr);
+        canvas.height = Math.round(cssHeight * dpr);
+        plotCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        plotCtx.clearRect(0, 0, cssWidth, cssHeight);
+        state.lossPlotHits = [];
+        hideLossTooltip();
+
+        const pad = { left: 42, right: 42, top: 10, bottom: 24 };
+        const plotW = cssWidth - pad.left - pad.right;
+        const plotH = cssHeight - pad.top - pad.bottom;
+        plotCtx.strokeStyle = "rgba(148,163,184,.25)";
+        plotCtx.strokeRect(pad.left, pad.top, plotW, plotH);
+
+        const points = (history || []).filter(
+          (row) => Number.isFinite(Number(row.loss)) && Number.isFinite(Number(row.step))
+        );
+        plotCtx.fillStyle = "rgba(148,163,184,.7)";
+        plotCtx.font = "11px ui-sans-serif, system-ui, sans-serif";
+        if (!points.length) {
+          plotCtx.fillText("No loss logs yet", pad.left + 8, pad.top + 18);
+          return;
+        }
+
+        const xs = points.map((row) => Number(row.step));
+        const losses = points.map((row) => Number(row.loss));
+        const lrs = points.map((row) => {
+          const value = Number(row.learning_rate);
+          return Number.isFinite(value) ? value : null;
+        });
+        const minX = Math.min(...xs);
+        const maxX = Math.max(...xs);
+        let minY = Math.min(...losses);
+        let maxY = Math.max(...losses);
+        if (minY === maxY) {
+          minY -= 0.05;
+          maxY += 0.05;
+        }
+        const yPad = (maxY - minY) * 0.08;
+        minY -= yPad;
+        maxY += yPad;
+        const hasLr = lrs.some((value) => value != null);
+        let minLr = 0;
+        let maxLr = 1;
+        if (hasLr) {
+          const finiteLrs = lrs.filter((value) => value != null);
+          minLr = Math.min(...finiteLrs);
+          maxLr = Math.max(...finiteLrs);
+          if (minLr === maxLr) {
+            minLr = Math.max(0, minLr * 0.9);
+            maxLr = maxLr * 1.1 || 1e-6;
+          }
+        }
+
+        const xScale = (value) =>
+          pad.left + ((value - minX) / Math.max(maxX - minX, 1e-9)) * plotW;
+        const yScale = (value) =>
+          pad.top + plotH - ((value - minY) / Math.max(maxY - minY, 1e-9)) * plotH;
+        const lrScale = (value) =>
+          pad.top + plotH - ((value - minLr) / Math.max(maxLr - minLr, 1e-12)) * plotH;
+
+        plotCtx.fillStyle = "rgba(148,163,184,.75)";
+        plotCtx.fillText(maxY.toFixed(3), 4, pad.top + 10);
+        plotCtx.fillText(minY.toFixed(3), 4, pad.top + plotH);
+        plotCtx.fillText(String(minX), pad.left, cssHeight - 6);
+        plotCtx.fillText(String(maxX), cssWidth - pad.right - 24, cssHeight - 6);
+
+        if (hasLr) {
+          plotCtx.strokeStyle = "#7aa2ff";
+          plotCtx.lineWidth = 1.5;
+          plotCtx.beginPath();
+          let started = false;
+          points.forEach((_row, index) => {
+            if (lrs[index] == null) return;
+            const x = xScale(xs[index]);
+            const y = lrScale(lrs[index]);
+            if (!started) {
+              plotCtx.moveTo(x, y);
+              started = true;
+            } else {
+              plotCtx.lineTo(x, y);
+            }
+          });
+          if (started) plotCtx.stroke();
+        }
+
+        plotCtx.strokeStyle = "#f6ad55";
+        plotCtx.lineWidth = 1.8;
+        plotCtx.beginPath();
+        points.forEach((_row, index) => {
+          const x = xScale(xs[index]);
+          const y = yScale(losses[index]);
+          if (index === 0) plotCtx.moveTo(x, y);
+          else plotCtx.lineTo(x, y);
+        });
+        plotCtx.stroke();
+
+        points.forEach((row, index) => {
+          const tip = {
+            step: xs[index],
+            loss: losses[index],
+            learningRate: lrs[index],
+            gradNorm: Number.isFinite(Number(row.grad_norm))
+              ? Number(row.grad_norm)
+              : null,
+            epoch: Number.isFinite(Number(row.epoch)) ? Number(row.epoch) : null,
+          };
+          state.lossPlotHits.push({
+            ...tip,
+            x: xScale(xs[index]),
+            y: yScale(losses[index]),
+          });
+          if (lrs[index] != null) {
+            state.lossPlotHits.push({
+              ...tip,
+              x: xScale(xs[index]),
+              y: lrScale(lrs[index]),
+            });
+          }
+        });
+      }
+
+      function renderEmbedSimPlot(
+        history,
+        { stopThreshold = null, stopThresholdMin = null } = {}
+      ) {
+        const canvas = $("#embed-sim-plot");
+        if (!canvas) return;
+        const plotCtx = canvas.getContext("2d");
+        const dpr = window.devicePixelRatio || 1;
+        const cssWidth = canvas.clientWidth || 600;
+        const cssHeight = 160;
+        canvas.width = Math.round(cssWidth * dpr);
+        canvas.height = Math.round(cssHeight * dpr);
+        plotCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        plotCtx.clearRect(0, 0, cssWidth, cssHeight);
+        state.embedSimPlotHits = [];
+        hideEmbedSimTooltip();
+
+        const pad = { left: 36, right: 10, top: 10, bottom: 24 };
+        const plotW = cssWidth - pad.left - pad.right;
+        const plotH = cssHeight - pad.top - pad.bottom;
+        plotCtx.strokeStyle = "#263041";
+        plotCtx.lineWidth = 1;
+        plotCtx.beginPath();
+        plotCtx.moveTo(pad.left, pad.top);
+        plotCtx.lineTo(pad.left, pad.top + plotH);
+        plotCtx.lineTo(pad.left + plotW, pad.top + plotH);
+        plotCtx.stroke();
+
+        const points = Array.isArray(history) ? history.filter((row) =>
+          Number.isFinite(Number(row?.avg_embed_sim ?? row?.eval_avg_embed_sim))
+        ) : [];
+        plotCtx.fillStyle = "#8b93a7";
+        plotCtx.font = "11px ui-sans-serif, system-ui, sans-serif";
+        if (!points.length) {
+          plotCtx.fillText("No eval points yet — set eval every N epochs to plot.", pad.left + 8, pad.top + plotH / 2);
+          return;
+        }
+
+        const xs = points.map((row, index) => {
+          const epoch = Number(row.epoch);
+          return Number.isFinite(epoch) ? epoch : index + 1;
+        });
+        const avgs = points.map((row) =>
+          Number(row.avg_embed_sim ?? row.eval_avg_embed_sim)
+        );
+        const mins = points.map((row) => {
+          const value = Number(row.min_embed_sim ?? row.eval_min_embed_sim);
+          return Number.isFinite(value) ? value : null;
+        });
+        const xMin = Math.min(...xs);
+        const xMax = Math.max(...xs, xMin + 1e-6);
+        const yValues = [...avgs, ...mins.filter((v) => v != null)];
+        if (stopThreshold != null && Number.isFinite(stopThreshold)) {
+          yValues.push(stopThreshold);
+        }
+        if (stopThresholdMin != null && Number.isFinite(stopThresholdMin)) {
+          yValues.push(stopThresholdMin);
+        }
+        let yMin = Math.min(...yValues);
+        let yMax = Math.max(...yValues);
+        const yPad = Math.max(0.02, (yMax - yMin) * 0.12 || 0.05);
+        yMin -= yPad;
+        yMax += yPad;
+        if (yMax - yMin < 1e-3) {
+          yMin -= 0.05;
+          yMax += 0.05;
+        }
+        const xScale = (x) => pad.left + ((x - xMin) / (xMax - xMin)) * plotW;
+        const yScale = (y) => pad.top + plotH - ((y - yMin) / (yMax - yMin)) * plotH;
+
+        plotCtx.fillStyle = "#8b93a7";
+        plotCtx.fillText(yMax.toFixed(2), 4, pad.top + 10);
+        plotCtx.fillText(yMin.toFixed(2), 4, pad.top + plotH);
+        plotCtx.fillText(String(xMin), pad.left, cssHeight - 6);
+        plotCtx.fillText(String(xMax), pad.left + plotW - 18, cssHeight - 6);
+
+        function drawThreshold(value, color, dash) {
+          if (value == null || !Number.isFinite(value)) return;
+          const y = yScale(value);
+          plotCtx.strokeStyle = color;
+          plotCtx.setLineDash(dash);
+          plotCtx.beginPath();
+          plotCtx.moveTo(pad.left, y);
+          plotCtx.lineTo(pad.left + plotW, y);
+          plotCtx.stroke();
+          plotCtx.setLineDash([]);
+        }
+        drawThreshold(stopThreshold, "#ffb454", [4, 4]);
+        drawThreshold(stopThresholdMin, "#f6ad55", [2, 4]);
+
+        function drawSeries(values, color) {
+          plotCtx.strokeStyle = color;
+          plotCtx.lineWidth = 1.8;
+          plotCtx.beginPath();
+          let started = false;
+          values.forEach((value, index) => {
+            if (value == null || !Number.isFinite(value)) return;
+            const x = xScale(xs[index]);
+            const y = yScale(value);
+            if (!started) {
+              plotCtx.moveTo(x, y);
+              started = true;
+            } else {
+              plotCtx.lineTo(x, y);
+            }
+          });
+          if (started) plotCtx.stroke();
+          plotCtx.fillStyle = color;
+          values.forEach((value, index) => {
+            if (value == null || !Number.isFinite(value)) return;
+            plotCtx.beginPath();
+            plotCtx.arc(xScale(xs[index]), yScale(value), 2.2, 0, Math.PI * 2);
+            plotCtx.fill();
+          });
+        }
+
+        drawSeries(mins, "#7aa2ff");
+        drawSeries(avgs, "#68d391");
+
+        state.embedSimPlotHits = [];
+        points.forEach((row, index) => {
+          const avg = avgs[index];
+          const min = mins[index];
+          const nRecovered = Number(row.n_recovered ?? row.eval_n_recovered);
+          const nTargets = Number(row.n_targets);
+          const step = Number(row.step);
+          const tip = {
+            epoch: xs[index],
+            avg,
+            min,
+            nRecovered: Number.isFinite(nRecovered) ? nRecovered : null,
+            nTargets: Number.isFinite(nTargets) ? nTargets : null,
+            step: Number.isFinite(step) ? step : null,
+          };
+          state.embedSimPlotHits.push({
+            ...tip,
+            x: xScale(xs[index]),
+            y: yScale(avg),
+          });
+          if (min != null && Number.isFinite(min)) {
+            state.embedSimPlotHits.push({
+              ...tip,
+              x: xScale(xs[index]),
+              y: yScale(min),
+            });
+          }
+        });
+      }
+
+      async function refreshMap({
+        resetView = false,
+        clearCustomSelection = false,
+      } = {}) {
+        const payload = await api("/api/map");
+        const selectedId = state.selected?.id;
+        state.points = payload.points;
+        state.bounds = payload.bounds;
+        state.primaryBounds = payload.primary_bounds;
+        state.setCounts = payload.metadata.set_counts || {};
+        state.projectionSets = payload.metadata.projection_sets || [];
+        if (
+          clearCustomSelection &&
+          ["coordinate", "text"].includes(state.selected?.kind)
+        ) {
+          state.selected = null;
+        }
+        if (selectedId && !["coordinate", "text", "zero"].includes(selectedId)) {
+          state.selected =
+            state.points.find((point) => point.id === selectedId) || state.selected;
+        }
+        if (resetView || !state.view) {
+          state.view = {
+            ...(state.showTest ? state.bounds : state.primaryBounds),
+          };
+        }
+        $("#metadata").textContent =
+          `${payload.metadata.model_name} · rank ${payload.metadata.bias_dim} · ` +
+          `${payload.metadata.train_points} original train · ` +
+          `${payload.metadata.test_points} original test · ` +
+          `${payload.metadata.learned_points} additional`;
+        $("#metadata").title = payload.metadata.checkpoint_dir;
+        $("#axes").textContent = `${payload.axes.x} · ${payload.axes.y}`;
+        const avgNorm = Number(
+          payload.axes?.avg_train_bias_norm ??
+          payload.metadata?.avg_train_bias_norm
+        );
+        if (Number.isFinite(avgNorm)) {
+          $("#axes").textContent += ` · avg ‖μ‖ ${avgNorm.toFixed(3)}`;
+        }
+        state.supportsText = payload.metadata.supports_text_activation;
+        state.supportsRecovery = payload.metadata.supports_recovery;
+        state.isVae = String(payload.metadata.bias_type || "vae") !== "linear";
+        state.supportsSdpo = Boolean(payload.metadata.supports_sdpo);
+        state.checkpointKlBeta = Number.isFinite(Number(payload.metadata.kl_beta))
+          ? Number(payload.metadata.kl_beta)
+          : null;
+        state.checkpointLambdaCe = Number.isFinite(Number(payload.metadata.lambda_ce))
+          ? Number(payload.metadata.lambda_ce)
+          : 1;
+        state.checkpointLambdaSdpo = Number.isFinite(Number(payload.metadata.lambda_sdpo))
+          ? Number(payload.metadata.lambda_sdpo)
+          : 0;
+        state.checkpointWeightDecayMode = String(
+          payload.metadata.weight_decay_mode || "none"
+        );
+        state.checkpointWdW = Number.isFinite(Number(payload.metadata.wd_W))
+          ? Number(payload.metadata.wd_W)
+          : null;
+        state.checkpointWdB = Number.isFinite(Number(payload.metadata.wd_b))
+          ? Number(payload.metadata.wd_b)
+          : null;
+        state.checkpointScheduler = String(
+          payload.metadata.lr_scheduler_type || "linear"
+        );
+        state.checkpointWarmup = Number.isFinite(Number(payload.metadata.warmup_ratio))
+          ? Number(payload.metadata.warmup_ratio)
+          : 0;
+        state.checkpointAnnealingMapCli = String(
+          payload.metadata.linear_annealing_map_cli || ""
+        ).trim();
+        if (
+          state.checkpointWdW != null &&
+          !$("#recovery-wd-w").dataset.userEdited
+        ) {
+          $("#recovery-wd-w").placeholder = String(state.checkpointWdW);
+        }
+        if (
+          state.checkpointWdB != null &&
+          !$("#recovery-wd-b").dataset.userEdited
+        ) {
+          $("#recovery-wd-b").placeholder = String(state.checkpointWdB);
+        }
+        if (
+          !$("#recovery-warmup").dataset.userEdited
+        ) {
+          $("#recovery-warmup").placeholder = String(state.checkpointWarmup);
+        }
+        const annealInput = $("#recovery-annealing-map");
+        if (annealInput && !annealInput.dataset.userEdited) {
+          annealInput.placeholder = state.checkpointAnnealingMapCli || "off";
+        }
+        updateEffectiveConfigSummary();
+        if (!state.supportsText) {
+          $("#target-text").disabled = true;
+          $("#activate-text").disabled = true;
+          $("#target-text").placeholder = "Requires a bias-network checkpoint";
+        }
+        if (!state.supportsRecovery) {
+          $("#scan-recovery").disabled = true;
+          $("#open-recovery-panel").disabled = true;
+          $("#train-new-target").disabled = true;
+          $("#new-target").disabled = true;
+          $("#new-definition").disabled = true;
+          $("#learn-w").disabled = true;
+          $("#learn-r").disabled = true;
+          $("#learn-bias-network").disabled = true;
+          $("#include-previous").disabled = true;
+          $("#recovery-epochs").disabled = true;
+          $("#recovery-lr").disabled = true;
+          $("#recovery-eval-epochs").disabled = true;
+          $("#recovery-stop-threshold").disabled = true;
+          $("#recovery-stop-threshold-min").disabled = true;
+          $("#recovery-stop-threshold-frac").disabled = true;
+          $("#delete-learned").disabled = true;
+          setRecoveryStatus("Recovery unavailable");
+        }
+        if (payload.metadata.test_error || payload.metadata.test_points === 0) {
+          $("#show-test").disabled = true;
+          $("#show-test").parentElement.title =
+            payload.metadata.test_error || "No test points are available";
+        }
+        updateCategoryLegend(payload.points, payload.metadata.cluster_source);
+        renderSetOptions();
+        updateRecoveryButtons();
+        resizeCanvas();
+      }
+
+      async function pollRecoveryJob(jobId) {
+        state.activeRecoveryJobId = jobId;
+        state.activeRecoveryJob = null;
+        setRecoveryBusy(true);
+        try {
+          while (true) {
+            const job = await api(`/api/recovery/jobs/${jobId}`);
+            state.activeRecoveryJob = job;
+            updateTrainingControlButtons();
+            const refittingPca = job.phase === "refitting_pca";
+            const statusText = refittingPca
+              ? (job.message || "Refitting bias PCA…")
+              : `${job.message} · ${job.progress}/${job.total}`;
+            setRecoveryStatus(statusText, statusText, {
+              pending: refittingPca,
+            });
+            if (job.type === "train") {
+              const liveHistory =
+                job.eval_history ||
+                job.result?.eval_history ||
+                [];
+              renderEmbedSimPlot(liveHistory, {
+                stopThreshold: readStopThreshold(),
+                stopThresholdMin: readStopThresholdMin(),
+              });
+              renderLossPlot(
+                job.loss_history || job.result?.loss_history || []
+              );
+            }
+            if (job.status === "completed") {
+              if (job.type === "scan") {
+                if (["test", "both"].includes(job.result.scope)) {
+                  state.showTest = true;
+                  $("#show-test").checked = true;
+                }
+                await refreshMap({ resetView: true });
+                setRecoveryStatus(
+                  `Scan complete · ${job.result.n_misses}/${job.result.n_scanned} misses`
+                );
+              } else {
+                const updatingPca = Boolean(job.result.geometry_refreshed);
+                if (updatingPca) {
+                  setRecoveryStatus(
+                    "Updating PCA map…",
+                    "Recomputing the bias-subspace map after PCA refit",
+                    { pending: true }
+                  );
+                }
+                await refreshMap({
+                  resetView: true,
+                  clearCustomSelection: updatingPca,
+                });
+                const checkpointName =
+                  job.result.checkpoint_dir.split("/").filter(Boolean).pop();
+                const geometryNote = job.result.geometry_refreshed
+                  ? " · PCA refit"
+                  : "";
+                const summary =
+                  `${job.result.stopped_early ? "Training stopped" : "Batch recovery complete"} · ` +
+                  `loss=${job.result.mean_train_loss.toFixed(4)} · ` +
+                  `${job.result.n_converged}/${job.result.n_evaluated} converged · ` +
+                  `${job.result.n_trained} trained · saved ${checkpointName}` +
+                  geometryNote;
+                setRecoveryStatus(
+                  summary,
+                  `Saved checkpoint: ${job.result.checkpoint_dir}`
+                );
+                state.lastRecoveryTrainResult = job.result;
+                renderRecoveryOutcome(job.result);
+                openRecoveryPanel();
+              }
+              return;
+            }
+            if (job.status === "failed") {
+              throw new Error(job.error || "Recovery job failed");
+            }
+            await new Promise((resolve) => setTimeout(resolve, 1000));
+          }
+        } catch (error) {
+          setRecoveryStatus("Recovery failed");
+          showError(error);
+        } finally {
+          state.activeRecoveryJobId = null;
+          state.activeRecoveryJob = null;
+          setRecoveryBusy(false);
+        }
+      }
+
+      canvas.addEventListener("pointerdown", (event) => {
+        canvas.setPointerCapture(event.pointerId);
+        state.dragging = true; state.moved = false;
+        state.dragStart = { ...canvasPosition(event), view: { ...state.view } };
+      });
+      canvas.addEventListener("pointermove", (event) => {
+        const pos = canvasPosition(event);
+        if (state.dragging) {
+          const dx = pos.x - state.dragStart.x, dy = pos.y - state.dragStart.y;
+          if (Math.abs(dx) + Math.abs(dy) > 3) state.moved = true;
+          const p = plotRect(), start = state.dragStart.view;
+          const wx = dx / (p.right - p.left) * (start.max_x - start.min_x);
+          const wy = dy / (p.bottom - p.top) * (start.max_y - start.min_y);
+          state.view = { min_x: start.min_x - wx, max_x: start.max_x - wx, min_y: start.min_y + wy, max_y: start.max_y + wy };
+          draw();
+          return;
+        }
+        state.hovered = nearestPoint(pos);
+        showTooltip(state.hovered, pos);
+        draw();
+      });
+      canvas.addEventListener("pointerleave", () => {
+        if (!state.dragging) { state.hovered = null; showTooltip(null); draw(); }
+      });
+      canvas.addEventListener("pointerup", async (event) => {
+        state.dragging = false;
+        if (state.moved || state.recoveryBusy) return;
+        const pos = canvasPosition(event);
+        const bounds = plotRect();
+        if (
+          pos.x < bounds.left || pos.x > bounds.right ||
+          pos.y < bounds.top || pos.y > bounds.bottom
+        ) return;
+        const point = nearestPoint(pos);
+        if (point) {
+          await activate({ kind: point.kind, point_id: point.id }, point);
+        } else {
+          const coordinate = screenToWorld(pos.x, pos.y);
+          const selected = { id: "coordinate", kind: "coordinate", ...coordinate };
+          await activate({ kind: "coordinate", ...coordinate }, selected);
+        }
+      });
+      canvas.addEventListener("wheel", (event) => {
+        event.preventDefault();
+        const pos = canvasPosition(event), anchor = screenToWorld(pos.x, pos.y);
+        const factor = Math.exp(event.deltaY * 0.0012);
+        const v = state.view;
+        state.view = {
+          min_x: anchor.x + (v.min_x - anchor.x) * factor,
+          max_x: anchor.x + (v.max_x - anchor.x) * factor,
+          min_y: anchor.y + (v.min_y - anchor.y) * factor,
+          max_y: anchor.y + (v.max_y - anchor.y) * factor,
+        };
+        draw();
+      }, { passive: false });
+
+      $("#reset-view").addEventListener("click", () => {
+        state.view = { ...(state.showTest ? state.bounds : state.primaryBounds) };
+        draw();
+      });
+      $("#base-mode").addEventListener("click", () => activate({ kind: "base" }, null));
+      $("#zero-mode").addEventListener("click", () => activate({ kind: "zero" }, { id: "zero", kind: "zero" }));
+      $("#show-test").addEventListener("change", (event) => {
+        state.showTest = event.target.checked;
+        state.view = { ...(state.showTest ? state.bounds : state.primaryBounds) };
+        state.hovered = null;
+        showTooltip(null);
+        draw();
+      });
+      $("#misses-only").addEventListener("change", (event) => {
+        state.missesOnly = event.target.checked;
+        state.hovered = null;
+        showTooltip(null);
+        draw();
+      });
+      $("#scan-recovery").addEventListener("click", async () => {
+        try {
+          const job = await api("/api/recovery/scan", {
+            method: "POST",
+            body: JSON.stringify({
+              scope: $("#recovery-scope").value,
+              n_samples: Number($("#recovery-samples").value) || 25,
+              temperature: 1,
+              top_p: 1,
+            }),
+          });
+          pollRecoveryJob(job.id);
+        } catch (error) {
+          showError(error);
+        }
+      });
+      $("#open-recovery-panel").addEventListener("click", () => openRecoveryPanel());
+      $("#close-recovery-panel").addEventListener("click", () => closeRecoveryPanel());
+      $("#apply-pca-sets").addEventListener("click", async () => {
+        const sets = checkedSetValues("input.pca-set");
+        if (!sets.length) {
+          showError(new Error("Select at least one non-empty PCA set"));
+          return;
+        }
+        try {
+          setRecoveryStatus("Refitting PCA from selected sets…", undefined, {
+            pending: true,
+          });
+          await api("/api/projection", {
+            method: "POST",
+            body: JSON.stringify({ sets }),
+          });
+          await refreshMap({
+            resetView: true,
+            clearCustomSelection: true,
+          });
+          $("#pca-set-picker").open = false;
+          setRecoveryStatus(
+            `PCA refit from ${sets.map((key) => pointSetLabels[key] || key).join(", ")}`
+          );
+        } catch (error) {
+          setRecoveryStatus("PCA refit failed");
+          showError(error);
+        }
+      });
+      $("#additional-learning-targets").addEventListener("input", () => {
+        updateTrainingSetButton();
+        updateEffectiveConfigSummary();
+      });
+      $("#train-selected-sets").addEventListener("click", async () => {
+        try {
+          const additionalTargets = parseAdditionalLearningTargets();
+          const payload = recoveryTrainPayload([], {
+            additional_targets: additionalTargets,
+          });
+          if (
+            !payload.training_sets.length &&
+            !payload.additional_targets.length
+          ) {
+            throw new Error(
+              "Select at least one training set or add a target"
+            );
+          }
+          const job = await api("/api/recovery/train", {
+            method: "POST",
+            body: JSON.stringify(payload),
+          });
+          pollRecoveryJob(job.id);
+        } catch (error) {
+          showError(error);
+        }
+      });
+      $("#recovery-modal").addEventListener("click", (event) => {
+        if (event.target === $("#recovery-modal")) closeRecoveryPanel();
+      });
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape" && !$("#recovery-modal").hidden) {
+          closeRecoveryPanel();
+        }
+      });
+      $("#recover-selected").addEventListener("click", async () => {
+        if (!state.selected?.id) return;
+        try {
+          const job = await api("/api/recovery/train", {
+            method: "POST",
+            body: JSON.stringify(
+              recoveryTrainPayload([state.selected.id])
+            ),
+          });
+          pollRecoveryJob(job.id);
+        } catch (error) {
+          showError(error);
+        }
+      });
+      $("#delete-learned").addEventListener("click", async () => {
+        const point = state.selected;
+        if (!point?.id || !selectedHasLearnedBias()) return;
+        const label = point.label || point.id;
+        if (!window.confirm(`Delete learned bias for “${label}”?`)) return;
+        try {
+          const result = await api("/api/learned/delete", {
+            method: "POST",
+            body: JSON.stringify({ point_id: point.id }),
+          });
+          state.selected = null;
+          const updatingPca = Boolean(result.geometry_refreshed);
+          if (updatingPca) {
+            setRecoveryStatus("Updating PCA map…", "Updating PCA map…", {
+              pending: true,
+            });
+          }
+          await refreshMap({ resetView: false });
+          draw();
+          const geometryNote = result.geometry_refreshed ? " · PCA refit" : "";
+          setRecoveryStatus(
+            `Deleted learned “${result.target}”` +
+              ` · ${result.removed_records} record(s)` +
+              geometryNote
+          );
+        } catch (error) {
+          showError(error);
+        }
+      });
+      async function startMissRecovery(kind) {
+        const pointIds = recoveryMissIds(kind);
+        if (!pointIds.length) return;
+        if (
+          pointIds.length > 1 &&
+          !window.confirm(
+            `Start batched recovery for ${pointIds.length} ${kind} misses?`
+          )
+        ) {
+          return;
+        }
+        try {
+          const job = await api("/api/recovery/train", {
+            method: "POST",
+            body: JSON.stringify(recoveryTrainPayload(pointIds)),
+          });
+          pollRecoveryJob(job.id);
+        } catch (error) {
+          showError(error);
+        }
+      }
+      $("#recover-train-misses").addEventListener("click", () => {
+        startMissRecovery("train");
+      });
+      $("#recover-test-misses").addEventListener("click", () => {
+        startMissRecovery("test");
+      });
+      $("#recovery-kl-beta").addEventListener("input", () => {
+        $("#recovery-kl-beta").dataset.userEdited = "1";
+        updateEffectiveConfigSummary();
+      });
+      $("#recovery-lambda-ce").addEventListener("input", () => {
+        $("#recovery-lambda-ce").dataset.userEdited = "1";
+        updateEffectiveConfigSummary();
+      });
+      $("#recovery-lambda-sdpo").addEventListener("input", () => {
+        $("#recovery-lambda-sdpo").dataset.userEdited = "1";
+        updateEffectiveConfigSummary();
+      });
+      $("#recovery-wd-mode").addEventListener("change", () => {
+        $("#recovery-wd-mode").dataset.userEdited = "1";
+        updateEffectiveConfigSummary();
+      });
+      $("#recovery-wd-w").addEventListener("input", () => {
+        $("#recovery-wd-w").dataset.userEdited = "1";
+        updateEffectiveConfigSummary();
+      });
+      $("#recovery-wd-b").addEventListener("input", () => {
+        $("#recovery-wd-b").dataset.userEdited = "1";
+        updateEffectiveConfigSummary();
+      });
+      $("#recovery-scheduler").addEventListener("change", () => {
+        updateEffectiveConfigSummary();
+      });
+      $("#recovery-annealing-map").addEventListener("input", () => {
+        $("#recovery-annealing-map").dataset.userEdited = "1";
+        updateEffectiveConfigSummary();
+      });
+      $("#recovery-warmup").addEventListener("input", () => {
+        $("#recovery-warmup").dataset.userEdited = "1";
+        updateEffectiveConfigSummary();
+      });
+      for (const id of [
+        "recovery-epochs",
+        "recovery-lr",
+        "recovery-eval-epochs",
+        "recovery-stop-threshold",
+        "recovery-stop-threshold-min",
+        "recovery-stop-threshold-frac",
+      ]) {
+        $(`#${id}`).addEventListener("input", () => {
+          updateEffectiveConfigSummary();
+        });
+      }
+      for (const id of [
+        "recovery-ce",
+        "recovery-vae",
+        "recovery-sdpo",
+        "recovery-wd",
+        "learn-w",
+        "learn-r",
+        "learn-bias-network",
+        "include-previous",
+      ]) {
+        $(`#${id}`).addEventListener("change", () => {
+          if (
+            ["recovery-ce", "recovery-vae", "recovery-sdpo", "recovery-wd"].includes(id)
+          ) {
+            updateLossModuleEnabledState();
+          } else {
+            updateEffectiveConfigSummary();
+          }
+        });
+      }
+      const embedSimCanvas = $("#embed-sim-plot");
+      if (embedSimCanvas) {
+        embedSimCanvas.addEventListener("pointermove", (event) => {
+          const rect = embedSimCanvas.getBoundingClientRect();
+          const x = event.clientX - rect.left;
+          const y = event.clientY - rect.top;
+          const hit = nearestEmbedSimHit(x, y);
+          if (!hit) {
+            hideEmbedSimTooltip();
+            return;
+          }
+          showEmbedSimTooltip(hit, event.clientX, event.clientY);
+        });
+        embedSimCanvas.addEventListener("pointerleave", () => {
+          hideEmbedSimTooltip();
+        });
+      }
+      const lossCanvas = $("#loss-plot");
+      if (lossCanvas) {
+        lossCanvas.addEventListener("pointermove", (event) => {
+          const rect = lossCanvas.getBoundingClientRect();
+          const x = event.clientX - rect.left;
+          const y = event.clientY - rect.top;
+          const hit = nearestLossHit(x, y);
+          if (!hit) {
+            hideLossTooltip();
+            return;
+          }
+          showLossTooltip(hit, event.clientX, event.clientY);
+        });
+        lossCanvas.addEventListener("pointerleave", () => {
+          hideLossTooltip();
+        });
+      }
+      $("#pause-training").addEventListener("click", async () => {
+        const jobId = state.activeRecoveryJobId;
+        if (!jobId) return;
+        const paused = ["pausing", "paused"].includes(
+          state.activeRecoveryJob?.training_state
+        );
+        const action = paused ? "resume" : "pause";
+        try {
+          state.activeRecoveryJob = await api(
+            `/api/recovery/jobs/${jobId}/${action}`,
+            { method: "POST" }
+          );
+          updateTrainingControlButtons();
+        } catch (error) {
+          showError(error);
+        }
+      });
+      $("#stop-training").addEventListener("click", async () => {
+        const jobId = state.activeRecoveryJobId;
+        if (!jobId || !window.confirm("Stop training and save the current result?")) {
+          return;
+        }
+        try {
+          state.activeRecoveryJob = await api(
+            `/api/recovery/jobs/${jobId}/stop`,
+            { method: "POST" }
+          );
+          updateTrainingControlButtons();
+        } catch (error) {
+          showError(error);
+        }
+      });
+      $("#new-target-form").addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const target = $("#new-target").value.trim();
+        const definition = $("#new-definition").value.trim();
+        if (!target || !definition) {
+          showError(new Error("Enter both a target and its definition."));
+          return;
+        }
+        try {
+          const job = await api("/api/recovery/train", {
+            method: "POST",
+            body: JSON.stringify(
+              recoveryTrainPayload([], {
+                new_target: target,
+                new_definition: definition,
+              })
+            ),
+          });
+          $("#new-target").value = "";
+          $("#new-definition").value = "";
+          pollRecoveryJob(job.id);
+        } catch (error) {
+          showError(error);
+        }
+      });
+      $("#search").addEventListener("input", (event) => {
+        state.search = event.target.value.trim().toLowerCase();
+        const exact = visiblePoints().find(
+          (point) => point.label.toLowerCase() === state.search
+        );
+        if (exact) {
+          const spanX = state.bounds.max_x - state.bounds.min_x;
+          const spanY = state.bounds.max_y - state.bounds.min_y;
+          state.view = { min_x: exact.x - spanX / 5, max_x: exact.x + spanX / 5, min_y: exact.y - spanY / 5, max_y: exact.y + spanY / 5 };
+        }
+        draw();
+      });
+      $("#text-target").addEventListener("submit", async (event) => {
+        event.preventDefault();
+        if (state.recoveryBusy) return;
+        const input = $("#target-text");
+        const text = input.value.trim();
+        if (!text) return;
+        const button = $("#activate-text");
+        button.disabled = true;
+        button.textContent = "Activating…";
+        try {
+          await activateText(text);
+        } catch (error) {
+          showError(error);
+        } finally {
+          button.disabled = false;
+          button.textContent = "Activate";
+        }
+      });
+
+      function formatSimilarityFlags(similarity, similarityError) {
+        const parts = [];
+        if (similarity && typeof similarity === "object") {
+          for (const [key, value] of Object.entries(similarity)) {
+            if (Number.isFinite(Number(value))) {
+              parts.push(`${key}=${Number(value).toFixed(3)}`);
+            }
+          }
+        }
+        if (similarityError) {
+          parts.push(`similarity error: ${similarityError}`);
+        }
+        return parts.join(" · ");
+      }
+
+      function appendMessage(role, text, flags = "", similarityFlags = "") {
+        $("#empty-chat")?.remove();
+        const message = document.createElement("div");
+        message.className = `message ${role}`;
+        const label = document.createElement("div");
+        label.className = "role"; label.textContent = role;
+        const bubble = document.createElement("div");
+        bubble.className = "bubble"; bubble.textContent = text;
+        message.append(label, bubble);
+        if (flags) {
+          const details = document.createElement("div");
+          details.className = "flags"; details.textContent = flags;
+          message.append(details);
+        }
+        if (similarityFlags) {
+          const details = document.createElement("div");
+          details.className = "flags";
+          details.textContent = similarityFlags;
+          message.append(details);
+        }
+        $("#messages").append(message);
+        $("#messages").scrollTop = $("#messages").scrollHeight;
+      }
+
+      function showError(error) {
+        appendMessage("error", error.message || String(error));
+        const last = $("#messages").lastElementChild;
+        last?.classList.add("status-error");
+      }
+
+      $("#composer").addEventListener("submit", async (event) => {
+        event.preventDefault();
+        if (state.busy || state.recoveryBusy) return;
+        const prompt = $("#prompt"), text = prompt.value.trim();
+        if (!text) return;
+        if (promptHistory[promptHistory.length - 1] !== text) {
+          promptHistory.push(text);
+        }
+        promptHistoryIndex = promptHistory.length;
+        promptDraft = "";
+        appendMessage("user", text);
+        prompt.value = "";
+        state.busy = true; $("#send").disabled = true; $("#send").textContent = "Running…";
+        try {
+          const sampled = $("#sample").checked;
+          const result = await enqueueOperation(() =>
+            api("/api/chat", {
+              method: "POST",
+              body: JSON.stringify({
+                session_id: sessionId,
+                text,
+                multi_turn: $("#multi-turn").checked,
+                enable_thinking: $("#enable-thinking").checked,
+                do_sample: sampled,
+                temperature: Number($("#temperature").value) || 1,
+                top_p: 1,
+                max_new_tokens:
+                  Number.parseInt($("#max-new-tokens").value, 10) || 64,
+                compute_similarity: $("#show-similarity").checked,
+              }),
+            })
+          );
+          setHasTarget(result.selection?.target);
+          const flags = result.selection.mode === "intervention"
+            ? `SEEN=${result.seen} · IS_TARGET=${result.is_target}`
+            : "";
+          appendMessage(
+            "assistant",
+            result.text,
+            flags,
+            formatSimilarityFlags(result.similarity, result.similarity_error)
+          );
+        } catch (error) {
+          showError(error);
+        } finally {
+          state.busy = false; $("#send").disabled = false; $("#send").textContent = "Send";
+          prompt.focus();
+        }
+      });
+      $("#prompt").addEventListener("keydown", (event) => {
+        const prompt = event.currentTarget;
+        const selectionCollapsed =
+          prompt.selectionStart === prompt.selectionEnd;
+        const onFirstLine =
+          prompt.value.lastIndexOf("\n", prompt.selectionStart - 1) === -1;
+        const onLastLine =
+          prompt.value.indexOf("\n", prompt.selectionEnd) === -1;
+        if (
+          event.key === "ArrowUp" &&
+          selectionCollapsed &&
+          onFirstLine &&
+          promptHistory.length
+        ) {
+          event.preventDefault();
+          if (promptHistoryIndex === promptHistory.length) {
+            promptDraft = prompt.value;
+          }
+          promptHistoryIndex = Math.max(0, promptHistoryIndex - 1);
+          prompt.value = promptHistory[promptHistoryIndex];
+          prompt.setSelectionRange(prompt.value.length, prompt.value.length);
+          return;
+        }
+        if (
+          event.key === "ArrowDown" &&
+          selectionCollapsed &&
+          onLastLine &&
+          promptHistoryIndex < promptHistory.length
+        ) {
+          event.preventDefault();
+          promptHistoryIndex += 1;
+          prompt.value =
+            promptHistoryIndex === promptHistory.length
+              ? promptDraft
+              : promptHistory[promptHistoryIndex];
+          prompt.setSelectionRange(prompt.value.length, prompt.value.length);
+          return;
+        }
+        if (event.key === "Enter" && !event.shiftKey) {
+          event.preventDefault(); $("#composer").requestSubmit();
+        }
+      });
+      $("#clear-chat").addEventListener("click", async () => {
+        try {
+          await enqueueOperation(() =>
+            api("/api/clear", {
+              method: "POST",
+              body: JSON.stringify({ session_id: sessionId }),
+            })
+          );
+          $("#messages").replaceChildren();
+          const empty = document.createElement("div");
+          empty.id = "empty-chat"; empty.className = "empty"; empty.textContent = "History cleared.";
+          $("#messages").append(empty);
+        } catch (error) { showError(error); }
+      });
+
+      async function initialize() {
+        try {
+          renderRecoveryOutcome(null);
+          setHasTarget(null);
+          await refreshMap({ resetView: true });
+        } catch (error) {
+          $("#metadata").textContent = `Failed to load: ${error.message}`;
+          $("#metadata").classList.add("status-error");
+        }
+      }
+      new ResizeObserver(resizeCanvas).observe(wrap);
+      initialize();
+    })();
+  </script>
+</body>
+</html>

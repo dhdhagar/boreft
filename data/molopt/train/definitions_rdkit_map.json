@@ -1,0 +1,107 @@
+{
+  "schema_version": 2,
+  "definition_length": 10,
+  "positions": [
+    {
+      "index": 0,
+      "name": "molecular_weight",
+      "unit": "Da",
+      "rdkit": "Descriptors.MolWt",
+      "definition_label": "average molecular weight"
+    },
+    {
+      "index": 1,
+      "name": "clogp",
+      "unit": null,
+      "rdkit": "Descriptors.MolLogP",
+      "definition_label": "Wildman-Crippen octanol-water partition coefficient estimate"
+    },
+    {
+      "index": 2,
+      "name": "tpsa",
+      "unit": "angstrom^2",
+      "rdkit": "rdMolDescriptors.CalcTPSA",
+      "definition_label": "topological polar surface area"
+    },
+    {
+      "index": 3,
+      "name": "hydrogen_bond_donors",
+      "unit": "count",
+      "rdkit": "rdMolDescriptors.CalcNumHBD",
+      "definition_label": "number of hydrogen-bond donor groups"
+    },
+    {
+      "index": 4,
+      "name": "hydrogen_bond_acceptors",
+      "unit": "count",
+      "rdkit": "rdMolDescriptors.CalcNumHBA",
+      "definition_label": "number of hydrogen-bond acceptor groups"
+    },
+    {
+      "index": 5,
+      "name": "rotatable_bonds",
+      "unit": "count",
+      "rdkit": "rdMolDescriptors.CalcNumRotatableBonds",
+      "definition_label": "number of rotatable bonds using RDKit's default definition"
+    },
+    {
+      "index": 6,
+      "name": "formal_charge",
+      "unit": "elementary_charge",
+      "rdkit": "Chem.GetFormalCharge",
+      "definition_label": "net formal charge of the represented molecular graph"
+    },
+    {
+      "index": 7,
+      "name": "fraction_csp3",
+      "unit": "fraction",
+      "rdkit": "rdMolDescriptors.CalcFractionCSP3",
+      "definition_label": "fraction of carbon atoms that are sp3-hybridized"
+    },
+    {
+      "index": 8,
+      "name": "aromatic_rings",
+      "unit": "count",
+      "rdkit": "rdMolDescriptors.CalcNumAromaticRings",
+      "definition_label": "number of aromatic rings"
+    },
+    {
+      "index": 9,
+      "name": "atom_stereocenters",
+      "unit": "count",
+      "rdkit": "rdMolDescriptors.CalcNumAtomStereoCenters",
+      "definition_label": "number of tetrahedral atom stereocenters, specified or unspecified"
+    }
+  ],
+  "normalization": {
+    "method": "median_mad",
+    "population": "full_corpus",
+    "count": 8000,
+    "median": [
+      314.221,
+      1.9969000000000001,
+      80.26,
+      2.0,
+      4.0,
+      4.0,
+      0.0,
+      0.533333,
+      0.0,
+      1.0
+    ],
+    "scale": [
+      149.6595744,
+      3.402285306,
+      46.516574999999996,
+      1.4826,
+      2.9652,
+      2.9652,
+      0.6720635665619641,
+      0.39536049420000013,
+      1.1610554465657121,
+      1.4826
+    ],
+    "mad_scale_factor": 1.4826,
+    "zero_mad_fallback": "population_std_then_one"
+  }
+}

@@ -1,0 +1,697 @@
+{
+  "schema_version": 1,
+  "source": {
+    "ontology": "https://ftp.ebi.ac.uk/pub/databases/chebi/ontology/chebi_core.obo.gz",
+    "data_version": "chebi/253",
+    "date": "07:07:2026 17:53"
+  },
+  "max_bridge_hops": 2,
+  "structural_bridges": {
+    "RO:0018033": "is conjugate base of",
+    "RO:0018034": "is conjugate acid of",
+    "RO:0018036": "is tautomer of",
+    "BFO:0000051": "has part"
+  },
+  "identity_bridges": [
+    "RO:0018033",
+    "RO:0018034",
+    "RO:0018036"
+  ],
+  "match": {
+    "exact": 7706,
+    "skeleton": 152,
+    "none": 142
+  },
+  "categories": [
+    {
+      "label": "tetrapyrrole",
+      "priority": 0,
+      "chebi_terms": [
+        {
+          "id": "CHEBI:26932",
+          "name": "tetrapyrrole"
+        }
+      ],
+      "count": 11
+    },
+    {
+      "label": "steroid",
+      "priority": 1,
+      "chebi_terms": [
+        {
+          "id": "CHEBI:35341",
+          "name": "steroid"
+        }
+      ],
+      "count": 305
+    },
+    {
+      "label": "terpenoid",
+      "priority": 2,
+      "chebi_terms": [
+        {
+          "id": "CHEBI:26873",
+          "name": "terpenoid"
+        },
+        {
+          "id": "CHEBI:24913",
+          "name": "isoprenoid"
+        },
+        {
+          "id": "CHEBI:23044",
+          "name": "carotenoid"
+        }
+      ],
+      "count": 471
+    },
+    {
+      "label": "alkaloid",
+      "priority": 3,
+      "chebi_terms": [
+        {
+          "id": "CHEBI:22315",
+          "name": "alkaloid"
+        }
+      ],
+      "count": 207
+    },
+    {
+      "label": "flavonoid",
+      "priority": 4,
+      "chebi_terms": [
+        {
+          "id": "CHEBI:47916",
+          "name": "flavonoid"
+        }
+      ],
+      "count": 207
+    },
+    {
+      "label": "polyketide",
+      "priority": 5,
+      "chebi_terms": [
+        {
+          "id": "CHEBI:26188",
+          "name": "polyketide"
+        },
+        {
+          "id": "CHEBI:25106",
+          "name": "macrolide"
+        }
+      ],
+      "count": 70
+    },
+    {
+      "label": "nucleoside/nucleotide",
+      "priority": 6,
+      "chebi_terms": [
+        {
+          "id": "CHEBI:36976",
+          "name": "nucleotide"
+        },
+        {
+          "id": "CHEBI:33838",
+          "name": "nucleoside"
+        },
+        {
+          "id": "CHEBI:18282",
+          "name": "nucleobase"
+        }
+      ],
+      "count": 168
+    },
+    {
+      "label": "peptide/amino acid",
+      "priority": 7,
+      "chebi_terms": [
+        {
+          "id": "CHEBI:16670",
+          "name": "peptide"
+        },
+        {
+          "id": "CHEBI:33709",
+          "name": "amino acid"
+        },
+        {
+          "id": "CHEBI:36080",
+          "name": "protein"
+        }
+      ],
+      "count": 743
+    },
+    {
+      "label": "glycoside",
+      "priority": 8,
+      "chebi_terms": [
+        {
+          "id": "CHEBI:24400",
+          "name": "glycoside"
+        }
+      ],
+      "count": 206
+    },
+    {
+      "label": "carbohydrate",
+      "priority": 9,
+      "chebi_terms": [
+        {
+          "id": "CHEBI:78616",
+          "name": "carbohydrates and carbohydrate derivatives"
+        },
+        {
+          "id": "CHEBI:16646",
+          "name": "carbohydrate"
+        }
+      ],
+      "count": 515
+    },
+    {
+      "label": "fatty acid",
+      "priority": 10,
+      "chebi_terms": [
+        {
+          "id": "CHEBI:35366",
+          "name": "fatty acid"
+        },
+        {
+          "id": "CHEBI:26333",
+          "name": "prostaglandin"
+        }
+      ],
+      "count": 564
+    },
+    {
+      "label": "lipid",
+      "priority": 11,
+      "chebi_terms": [
+        {
+          "id": "CHEBI:18059",
+          "name": "lipid"
+        }
+      ],
+      "count": 649
+    },
+    {
+      "label": "polyphenol",
+      "priority": 12,
+      "chebi_terms": [
+        {
+          "id": "CHEBI:26195",
+          "name": "polyphenol"
+        },
+        {
+          "id": "CHEBI:25036",
+          "name": "lignan"
+        },
+        {
+          "id": "CHEBI:26776",
+          "name": "stilbenoid"
+        },
+        {
+          "id": "CHEBI:23403",
+          "name": "coumarins"
+        }
+      ],
+      "count": 175
+    },
+    {
+      "label": "phenol",
+      "priority": 13,
+      "chebi_terms": [
+        {
+          "id": "CHEBI:33853",
+          "name": "phenols"
+        }
+      ],
+      "count": 438
+    },
+    {
+      "label": "benzenoid",
+      "priority": 14,
+      "chebi_terms": [
+        {
+          "id": "CHEBI:33836",
+          "name": "benzenoid aromatic compound"
+        }
+      ],
+      "count": 550
+    },
+    {
+      "label": "heterocycle",
+      "priority": 15,
+      "chebi_terms": [
+        {
+          "id": "CHEBI:33833",
+          "name": "heteroarene"
+        },
+        {
+          "id": "CHEBI:24532",
+          "name": "organic heterocyclic compound"
+        }
+      ],
+      "count": 1187
+    },
+    {
+      "label": "organohalogen",
+      "priority": 16,
+      "chebi_terms": [
+        {
+          "id": "CHEBI:17792",
+          "name": "organohalogen compound"
+        }
+      ],
+      "count": 72
+    },
+    {
+      "label": "organophosphorus",
+      "priority": 17,
+      "chebi_terms": [
+        {
+          "id": "CHEBI:25710",
+          "name": "organophosphorus compound"
+        }
+      ],
+      "count": 112
+    },
+    {
+      "label": "organosulfur",
+      "priority": 18,
+      "chebi_terms": [
+        {
+          "id": "CHEBI:33261",
+          "name": "organosulfur compound"
+        }
+      ],
+      "count": 152
+    },
+    {
+      "label": "organic acid",
+      "priority": 19,
+      "chebi_terms": [
+        {
+          "id": "CHEBI:64709",
+          "name": "organic acid"
+        }
+      ],
+      "count": 332
+    },
+    {
+      "label": "amine/amide",
+      "priority": 20,
+      "chebi_terms": [
+        {
+          "id": "CHEBI:50047",
+          "name": "organic amino compound"
+        },
+        {
+          "id": "CHEBI:32988",
+          "name": "amide"
+        }
+      ],
+      "count": 162
+    },
+    {
+      "label": "organooxygen",
+      "priority": 21,
+      "chebi_terms": [
+        {
+          "id": "CHEBI:36963",
+          "name": "organooxygen compound"
+        }
+      ],
+      "count": 238
+    },
+    {
+      "label": "hydrocarbon",
+      "priority": 22,
+      "chebi_terms": [
+        {
+          "id": "CHEBI:24632",
+          "name": "hydrocarbon"
+        }
+      ],
+      "count": 35
+    },
+    {
+      "label": "organometallic",
+      "priority": 23,
+      "chebi_terms": [
+        {
+          "id": "CHEBI:25707",
+          "name": "organometallic compound"
+        }
+      ],
+      "count": 3
+    },
+    {
+      "label": "other organic",
+      "priority": 24,
+      "chebi_terms": [
+        {
+          "id": "CHEBI:50860",
+          "name": "organic molecular entity"
+        }
+      ],
+      "count": 219
+    },
+    {
+      "label": "inorganic",
+      "priority": 25,
+      "chebi_terms": [
+        {
+          "id": "CHEBI:24835",
+          "name": "inorganic molecular entity"
+        }
+      ],
+      "count": 48
+    },
+    {
+      "label": "unknown",
+      "priority": 26,
+      "chebi_terms": [],
+      "count": 161
+    }
+  ],
+  "roles": [
+    {
+      "label": "antineoplastic",
+      "priority": 0,
+      "chebi_terms": [
+        {
+          "id": "CHEBI:35610",
+          "name": "antineoplastic agent"
+        }
+      ],
+      "count": 532
+    },
+    {
+      "label": "antimicrobial",
+      "priority": 1,
+      "chebi_terms": [
+        {
+          "id": "CHEBI:33281",
+          "name": "antimicrobial agent"
+        },
+        {
+          "id": "CHEBI:33282",
+          "name": "antibacterial agent"
+        },
+        {
+          "id": "CHEBI:22587",
+          "name": "antiviral agent"
+        },
+        {
+          "id": "CHEBI:35718",
+          "name": "antifungal agent"
+        },
+        {
+          "id": "CHEBI:35442",
+          "name": "antiparasitic agent"
+        }
+      ],
+      "count": 475
+    },
+    {
+      "label": "anti-inflammatory/analgesic",
+      "priority": 2,
+      "chebi_terms": [
+        {
+          "id": "CHEBI:67079",
+          "name": "anti-inflammatory agent"
+        },
+        {
+          "id": "CHEBI:35480",
+          "name": "analgesic"
+        }
+      ],
+      "count": 177
+    },
+    {
+      "label": "neuroactive drug",
+      "priority": 3,
+      "chebi_terms": [
+        {
+          "id": "CHEBI:38867",
+          "name": "anaesthetic"
+        },
+        {
+          "id": "CHEBI:35469",
+          "name": "antidepressant"
+        },
+        {
+          "id": "CHEBI:35623",
+          "name": "anticonvulsant"
+        }
+      ],
+      "count": 76
+    },
+    {
+      "label": "cardiovascular drug",
+      "priority": 4,
+      "chebi_terms": [
+        {
+          "id": "CHEBI:35554",
+          "name": "cardiovascular drug"
+        }
+      ],
+      "count": 89
+    },
+    {
+      "label": "immunomodulator",
+      "priority": 5,
+      "chebi_terms": [
+        {
+          "id": "CHEBI:50846",
+          "name": "immunomodulator"
+        }
+      ],
+      "count": 10
+    },
+    {
+      "label": "radiopharmaceutical",
+      "priority": 6,
+      "chebi_terms": [
+        {
+          "id": "CHEBI:35232",
+          "name": "radiopharmaceutical"
+        }
+      ],
+      "count": 1
+    },
+    {
+      "label": "drug",
+      "priority": 7,
+      "chebi_terms": [
+        {
+          "id": "CHEBI:23888",
+          "name": "drug"
+        },
+        {
+          "id": "CHEBI:52217",
+          "name": "pharmaceutical"
+        }
+      ],
+      "count": 411
+    },
+    {
+      "label": "agrochemical",
+      "priority": 8,
+      "chebi_terms": [
+        {
+          "id": "CHEBI:33286",
+          "name": "agrochemical"
+        },
+        {
+          "id": "CHEBI:25944",
+          "name": "pesticide"
+        },
+        {
+          "id": "CHEBI:24527",
+          "name": "herbicide"
+        },
+        {
+          "id": "CHEBI:24852",
+          "name": "insecticide"
+        },
+        {
+          "id": "CHEBI:24127",
+          "name": "fungicide"
+        },
+        {
+          "id": "CHEBI:26155",
+          "name": "plant growth regulator"
+        }
+      ],
+      "count": 207
+    },
+    {
+      "label": "dye/fluorochrome",
+      "priority": 9,
+      "chebi_terms": [
+        {
+          "id": "CHEBI:37958",
+          "name": "dye"
+        },
+        {
+          "id": "CHEBI:51121",
+          "name": "fluorescent dye"
+        },
+        {
+          "id": "CHEBI:51217",
+          "name": "fluorochrome"
+        }
+      ],
+      "count": 96
+    },
+    {
+      "label": "toxin/contaminant",
+      "priority": 10,
+      "chebi_terms": [
+        {
+          "id": "CHEBI:27026",
+          "name": "toxin"
+        },
+        {
+          "id": "CHEBI:50904",
+          "name": "allergen"
+        },
+        {
+          "id": "CHEBI:78298",
+          "name": "environmental contaminant"
+        }
+      ],
+      "count": 73
+    },
+    {
+      "label": "signalling molecule",
+      "priority": 11,
+      "chebi_terms": [
+        {
+          "id": "CHEBI:24621",
+          "name": "hormone"
+        },
+        {
+          "id": "CHEBI:25512",
+          "name": "neurotransmitter"
+        },
+        {
+          "id": "CHEBI:62488",
+          "name": "signalling molecule"
+        },
+        {
+          "id": "CHEBI:26013",
+          "name": "pheromone"
+        }
+      ],
+      "count": 44
+    },
+    {
+      "label": "nutrient/cofactor",
+      "priority": 12,
+      "chebi_terms": [
+        {
+          "id": "CHEBI:33229",
+          "name": "vitamin (role)"
+        },
+        {
+          "id": "CHEBI:23357",
+          "name": "cofactor"
+        },
+        {
+          "id": "CHEBI:33284",
+          "name": "nutrient"
+        }
+      ],
+      "count": 44
+    },
+    {
+      "label": "food/flavour",
+      "priority": 13,
+      "chebi_terms": [
+        {
+          "id": "CHEBI:78295",
+          "name": "food component"
+        },
+        {
+          "id": "CHEBI:35617",
+          "name": "flavouring agent"
+        },
+        {
+          "id": "CHEBI:48318",
+          "name": "fragrance"
+        }
+      ],
+      "count": 46
+    },
+    {
+      "label": "antioxidant/protective",
+      "priority": 14,
+      "chebi_terms": [
+        {
+          "id": "CHEBI:22586",
+          "name": "antioxidant"
+        },
+        {
+          "id": "CHEBI:50267",
+          "name": "protective agent"
+        }
+      ],
+      "count": 51
+    },
+    {
+      "label": "reagent/solvent",
+      "priority": 15,
+      "chebi_terms": [
+        {
+          "id": "CHEBI:46787",
+          "name": "solvent"
+        },
+        {
+          "id": "CHEBI:33893",
+          "name": "reagent"
+        },
+        {
+          "id": "CHEBI:27780",
+          "name": "detergent"
+        },
+        {
+          "id": "CHEBI:35195",
+          "name": "surfactant"
+        },
+        {
+          "id": "CHEBI:35225",
+          "name": "buffer"
+        }
+      ],
+      "count": 43
+    },
+    {
+      "label": "xenobiotic",
+      "priority": 16,
+      "chebi_terms": [
+        {
+          "id": "CHEBI:35703",
+          "name": "xenobiotic"
+        }
+      ],
+      "count": 12
+    },
+    {
+      "label": "metabolite",
+      "priority": 17,
+      "chebi_terms": [
+        {
+          "id": "CHEBI:25212",
+          "name": "metabolite"
+        }
+      ],
+      "count": 2814
+    },
+    {
+      "label": "unknown",
+      "priority": 18,
+      "chebi_terms": [],
+      "count": 2799
+    }
+  ]
+}

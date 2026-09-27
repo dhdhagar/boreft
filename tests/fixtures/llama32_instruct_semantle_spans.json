@@ -1,0 +1,14 @@
+{
+  "model_name": "meta-llama/Llama-3.2-1B-Instruct",
+  "probe_token": "<|reserved_special_token_0|>",
+  "chat": {
+    "content_span": [30, 46],
+    "content_f1_token": "Generate",
+    "content_l1_token": ")."
+  },
+  "plain": {
+    "content_span": [1, 18],
+    "content_f1_token": "Here",
+    "content_l1_token": "):"
+  }
+}

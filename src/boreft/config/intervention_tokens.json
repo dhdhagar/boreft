@@ -1,0 +1,9 @@
+{
+  "meta-llama/Llama-3.2-1B-Instruct": "<|reserved_special_token_0|>",
+  "meta-llama/Llama-3.2-1B": "<|reserved_special_token_0|>",
+  "meta-llama/Llama-3.2-3B-Instruct": "<|reserved_special_token_0|>",
+  "google/gemma-3-1b-it": "<unused0>",
+  "Qwen/Qwen3-1.7B": "<|boreft_0|>",
+  "Qwen/Qwen3-4B": "<|boreft_0|>",
+  "PharMolix/BioMedGPT-Mol": "<|boreft_0|>"
+}

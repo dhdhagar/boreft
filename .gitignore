@@ -1,0 +1,41 @@
+# Local W&B run logs at the repo root. Anchored so notes/wandb/ is not ignored.
+/wandb/
+embed_cache/
+outputs/
+experiments/outputs/
+jobs/
+# Upstream corpora fetched by the prepare_* scripts; the derived
+# data/<task>/train/ files are what the repo commits.
+data/semantle/analysis/
+data/molopt/raw/
+data/hypogen/raw/
+# Regenerated on demand by scripts/analyze_embedding_models.py.
+data/molopt/analysis/
+data/molopt/**/oracle_scores.json
+# TDC fingerprint-oracle pickles (cwd-relative ``./oracle``).
+/oracle/
+__pycache__/
+*.egg-info/
+models/
+scripts/jobs/
+neighborhood_loss_ideas.md
+**/eval/pareto/
+FETCH_HEAD
+.DS_Store
+# LaTeX build artifacts (latexmk / pdflatex / bibtex)
+*.aux
+*.bbl
+*.bcf
+*.blg
+*.fdb_latexmk
+*.fls
+*.lof
+*.lot
+*.nav
+*.out
+*.snm
+*.synctex.gz
+*.toc
+*.vrb
+notes/theory/*.log
+notes/theory/*.pdf

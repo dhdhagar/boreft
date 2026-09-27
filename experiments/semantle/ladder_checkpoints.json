@@ -1,0 +1,35 @@
+{
+  "protocol_cell": "s1_t0_ard_d64",
+  "targets_json": "experiments/outputs/semantle/sweep/targets.json",
+  "warmstarts_json": "experiments/outputs/semantle/sweep/canonical_warmstarts.json",
+  "canonical_output_dir": "outputs/1784053292",
+  "canonical_wandb": "jn0knp44",
+  "n_ladder": {
+    "1": {"output_dir": "outputs/1788593191", "wandb": "zenhqf72"},
+    "2": {"output_dir": "outputs/1788593190", "wandb": "00tc27ir"},
+    "4": {"output_dir": "outputs/1788593189", "wandb": "bx1yhola"},
+    "8": {"output_dir": "outputs/1788593188", "wandb": "dlt0l3cs"},
+    "16": {"output_dir": "outputs/1788593187", "wandb": "7mxbkt3m"},
+    "32": {"output_dir": "outputs/1788593186", "wandb": "ock69i1m"},
+    "64": {"output_dir": "outputs/1788593185", "wandb": "49i8dsue"},
+    "128": {"output_dir": "outputs/1788593184", "wandb": "jb04tqj3"},
+    "256": {"output_dir": "outputs/1788593183", "wandb": "5x4fkr5e"},
+    "512": {"output_dir": null, "wandb": null, "note": "full-recipe cell missing; train with --test-n-samples 3488"},
+    "1024": {"output_dir": "outputs/1788593182", "wandb": "w6oeimvf"},
+    "2048": {"output_dir": "outputs/1788593181", "wandb": "4bkrgzxd"},
+    "3072": {"output_dir": "outputs/1784053292", "wandb": "jn0knp44", "reuse_canonical_search": true}
+  },
+  "rank_ladder": {
+    "4": {"output_dir": "outputs/1788339541", "wandb": "wyc4kghf"},
+    "8": {"output_dir": "outputs/1788353086", "wandb": "mzeavsgd"},
+    "16": {"output_dir": "outputs/1788331823", "wandb": "3z0bxbu2"},
+    "32": {
+      "output_dir": "outputs/1789454141",
+      "wandb": "edl636hz",
+      "previous": {"output_dir": "outputs/1788331831", "wandb": "8kmbec6t"},
+      "note": "seed rerun; recon beats rank 16, so this is the search checkpoint"
+    },
+    "64": {"output_dir": "outputs/1784053292", "wandb": "jn0knp44", "reuse_canonical_search": true},
+    "128": {"output_dir": "outputs/1788591936", "wandb": "itw2ruaz", "note": "newer of two rank-128 3072 runs"}
+  }
+}

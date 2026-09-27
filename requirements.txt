@@ -1,0 +1,55 @@
+# torch: install separately for your CUDA — see README
+
+# transformers stack (4.x: Gemma3 + pyvene, no FP8 crash on torch 2.5.1)
+transformers==4.57.6
+tokenizers==0.22.2
+safetensors==0.4.5
+accelerate==1.4.0  # transformers 4.57+ requires >=1.3.0 (unwrap_model keep_torch_compile)
+datasets==5.0.0
+
+# pyreft / interventions
+pyvene @ git+https://github.com/stanfordnlp/pyvene.git@9e333904dcf9e597ca76170010d17f4d4580de8d
+
+# training / logging / CLI
+wandb==0.27.2
+tyro==1.0.14
+numpy==2.4.6
+tqdm==4.67.1
+
+# molopt: SMILES canonicalization + validity
+rdkit==2026.3.5
+# molopt: SmiSelf invalid-SMILES repair (Tao et al., EMNLP 2025). Not on PyPI
+# (no setup.py / pyproject). After `pip install -r requirements.txt`:
+#   bash scripts/install_smiself.sh
+
+
+# molopt: IUPAC names (PubChem lookup + STOUT SMILES↔IUPAC)
+pubchempy==1.0.5
+# STOUT-pypi 2.0.5 (PyPI) pins tensorflow==2.10.1 (no wheel here) and its GCS
+# model zip 404s. Install 2.2.0 after `pip install -r requirements.txt`:
+#   pip install 'STOUT-pypi @ git+https://github.com/egonw/Smiles-TO-iUpac-Translator.git' --no-deps
+# STOUT also needs a JVM (conda: `conda install -c conda-forge openjdk`).
+pystow==0.9.0
+unicodedata2==17.0.1
+JPype1==1.7.1
+tensorflow==2.21.0  # STOUT runtime; 2.10.1/2.15 pins are unsatisfiable with numpy 2.x
+
+# embeddings + eval
+# 5.x is not needed by the tasks (both use Qwen3-Embedding) but is required by the
+# CheMatE candidate in scripts/analyze_embedding_models.py, which ships a
+# modules.json on the v5 module paths and a sentence_bert_config.json with
+# modality_config, neither of which 3.x can load. Resolves against the
+# transformers pin above.
+sentence-transformers==5.7.0
+adjustText==1.3.0
+scipy==1.17.1
+scikit-learn==1.9.0
+matplotlib==3.10.9
+
+# Bayesian optimization over learned bias vectors
+botorch==0.16.1  # newest release supporting the project's Python 3.10 floor
+gpytorch==1.15.2
+
+# interactive subspace visualization
+fastapi==0.139.1
+uvicorn==0.51.0
