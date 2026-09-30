@@ -6,7 +6,7 @@
 
 <sup>1</sup>University of Massachusetts Amherst &ensp; <sup>2</sup>New York University &ensp; <sup>3</sup>IBM Research &ensp; <sup>4</sup>University of Southern California
 
-[![Paper](https://img.shields.io/badge/Paper-arXiv-b31b1b.svg)](https://arxiv.org/abs/XXXX.XXXXX)
+[![Paper](https://img.shields.io/badge/Paper-arXiv-b31b1b.svg)](https://arxiv.org/abs/2609.33722)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 <img src="assets/overview.png" alt="BOReFT overview. Bayesian optimization searches a learned intervention space, where each code steers a language-model activation to generate a candidate scored by an external objective." width="480">
@@ -238,9 +238,9 @@ Then open `http://127.0.0.1:8000`. The page can chat with the intervened model, 
 @article{agarwal2026boreft,
   title   = {BOReFT: Manifold Steering of Language Models for Black-box Optimization},
   author  = {Agarwal, Dhruv and Angell, Rico and Srinivas, Kavitha and Naseem, Tahira and Samulowitz, Horst and Neiswanger, Willie and McCallum, Andrew},
-  journal = {arXiv preprint arXiv:XXXX.XXXXX},
+  journal = {arXiv preprint arXiv:2609.33722},
   year    = {2026},
-  url     = {https://arxiv.org/abs/XXXX.XXXXX}
+  url     = {https://arxiv.org/pdf/2609.33722}
 }
 ```
 
